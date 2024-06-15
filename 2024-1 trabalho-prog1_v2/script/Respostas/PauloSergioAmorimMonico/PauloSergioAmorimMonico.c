@@ -288,12 +288,10 @@ tPartida realizarJogo(char const diretorio[], tPartida partida)
     char acao = 0;
     int indiceInimigoAtingido = -1;
 
-    printf("Pontos: 0 | Iteracoes: 0\n");
-    imprimirMapa(partida.mapa);
-
-    for (int i = 1; 1; i++)
+    for (int i = 0; 1; i++)
     {
-        acao = fgetc(pEntradaFile);
+        printf("Pontos: %d | Iteracoes: %d\n", partida.pontos, i);
+        imprimirMapa(partida.mapa);
         if (!algumInimigoVivo(partida))
         {
             printf("Parabéns, você ganhou!\n");
@@ -310,6 +308,7 @@ tPartida realizarJogo(char const diretorio[], tPartida partida)
             partida = destruirInimigo(partida, indiceInimigoAtingido);
             partida = destruirTiro(partida);
         }
+        acao = fgetc(pEntradaFile);
         partida = moverTiro(partida);
         partida = realizarJogada(acao, partida);
         partida = moverInimigos(partida);
@@ -317,8 +316,6 @@ tPartida realizarJogo(char const diretorio[], tPartida partida)
         partida = desenharJogador(partida);
         partida = desenharInimigos(diretorio, partida);
         partida = desenharTiro(partida);
-        printf("Pontos: %d | Iteracoes: %d\n", partida.pontos, i);
-        imprimirMapa(partida.mapa);
         while (acao != '\n')
             acao = fgetc(pEntradaFile);
     }
