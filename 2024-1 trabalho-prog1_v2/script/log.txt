@@ -1,0 +1,267 @@
+- Arquivo de configuração encontrado!
+ - Arquivos objetos necessários do professor existem na pasta Gabarito-obj.
+
+#######################################
+ALUNO: PauloSergioAmorimMonico
+#######################################
+
+CRIANDO O DIRETÓRIO DE RESULTADO PARA PauloSergioAmorimMonico:
+ - Diretório Resultados/PauloSergioAmorimMonico criado com sucesso!
+ - Diretório Resultados/PauloSergioAmorimMonico/completo criado com sucesso!
+ - Arquivos criados: ok!
+
+CHECKANDO OS ARQUIVOS DO ALUNO:
+ - Arquivo esperado 'Respostas/PauloSergioAmorimMonico/main.c' não encontrado!
+ - Arquivos esperados enviados: Faltando!
+
+COPIANDO OS ARQUIVOS PARA A PASTA DE RESULTADO DO ALUNO:
+ - Pasta completo:
+ - Copiando os Casos de teste para a pasta Resultados/PauloSergioAmorimMonico/completo
+ - Copiando Arquivos Extras do Aluno:
+ - Copiando Respostas/PauloSergioAmorimMonico/PauloSergioAmorimMonico.c para Resultados/PauloSergioAmorimMonico/completo
+ - Arquivos copiados: ok!
+
+COMPILANDO OS ARQUIVOS NA PASTA DE RESULTADO DO ALUNO:
+ - Compilação dos arquivos do aluno na pasta completo ok!
+ - Arquivo de output gerado: Resultados/PauloSergioAmorimMonico/completo/result_compilation.txt
+ - Arquivos Compilados: ok!
+
+LINKANDO OS ARQUIVOS COMPILADOS:
+ - Pasta completo:
+ - Gerando o binário prog linkando com o(s) arquivo(s) completo/*.o
+ - Arquivos Linkados: Ok! Binário prog gerado com sucesso.
+ - Arquivo de output gerado: Resultados/PauloSergioAmorimMonico/completo/result_linking.txt
+
+EXECUTANDO O PROGRAMA EM CADA CASO:
+ - Pasta completo / Caso 1:
+ - Resultado para o saida.txt: Ok! Peso: 3.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/1/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/1/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/1/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/1/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 4.00 (soma total) - 0% (desconto do valgrind) = 4.00 de 8.0 pontos.
+ - Pasta completo / Caso 10:
+ - Resultado para o saida.txt: Ok! Peso: 3.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/10/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/10/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/10/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/10/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 4.00 (soma total) - 0% (desconto do valgrind) = 4.00 de 8.0 pontos.
+ - Pasta completo / Caso 11:
+ - Resultado para o saida.txt: Ok! Peso: 3.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/11/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/11/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/11/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/11/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 4.00 (soma total) - 0% (desconto do valgrind) = 4.00 de 8.0 pontos.
+ - Pasta completo / Caso 12:
+ - Resultado para o saida.txt: Ok! Peso: 3.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/12/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/12/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/12/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/12/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 4.00 (soma total) - 0% (desconto do valgrind) = 4.00 de 8.0 pontos.
+ - Pasta completo / Caso 13:
+ - Resultado para o saida.txt: Ok! Peso: 3.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/13/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/13/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/13/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/13/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 4.00 (soma total) - 0% (desconto do valgrind) = 4.00 de 8.0 pontos.
+ - Pasta completo / Caso 14:
+ - Resultado para o saida.txt: Ok! Peso: 3.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/14/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/14/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/14/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/14/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 4.00 (soma total) - 0% (desconto do valgrind) = 4.00 de 8.0 pontos.
+ - Pasta completo / Caso 15:
+ - Resultado para o saida.txt: Ok! Peso: 3.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/15/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/15/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/15/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/15/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 4.00 (soma total) - 0% (desconto do valgrind) = 4.00 de 8.0 pontos.
+ - Pasta completo / Caso 16:
+ - Resultado para o saida.txt: Ok! Peso: 3.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/16/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/16/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/16/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/16/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 4.00 (soma total) - 0% (desconto do valgrind) = 4.00 de 8.0 pontos.
+ - Pasta completo / Caso 17:
+ - Resultado para o saida.txt: Ok! Peso: 3.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/17/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/17/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/17/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/17/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 4.00 (soma total) - 0% (desconto do valgrind) = 4.00 de 8.0 pontos.
+ - Pasta completo / Caso 18:
+ - Resultado para o saida.txt: Ok! Peso: 3.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/18/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/18/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/18/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/18/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 4.00 (soma total) - 0% (desconto do valgrind) = 4.00 de 8.0 pontos.
+ - Pasta completo / Caso 19:
+ - Resultado para o saida.txt: Ok! Peso: 3.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/19/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/19/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/19/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/19/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 4.00 (soma total) - 0% (desconto do valgrind) = 4.00 de 8.0 pontos.
+ - Pasta completo / Caso 2:
+ - Resultado para o saida.txt: Ok! Peso: 3.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/2/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/2/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/2/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/2/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 4.00 (soma total) - 0% (desconto do valgrind) = 4.00 de 8.0 pontos.
+ - Pasta completo / Caso 20:
+ - Resultado para o saida.txt: Ok! Peso: 3.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/20/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/20/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/20/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/20/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 4.00 (soma total) - 0% (desconto do valgrind) = 4.00 de 8.0 pontos.
+ - Pasta completo / Caso 21:
+ - Resultado para o saida.txt: Ok! Peso: 3.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/21/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/21/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/21/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/21/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 4.00 (soma total) - 0% (desconto do valgrind) = 4.00 de 8.0 pontos.
+ - Pasta completo / Caso 3:
+ - Resultado para o saida.txt: Ok! Peso: 3.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/3/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/3/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/3/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/3/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 4.00 (soma total) - 0% (desconto do valgrind) = 4.00 de 8.0 pontos.
+ - Pasta completo / Caso 4:
+ - Resultado para o saida.txt: Ok! Peso: 3.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/4/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/4/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/4/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/4/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 4.00 (soma total) - 0% (desconto do valgrind) = 4.00 de 8.0 pontos.
+ - Pasta completo / Caso 5:
+ - Resultado para o saida.txt: Ok! Peso: 3.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/5/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/5/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/5/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/5/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 4.00 (soma total) - 0% (desconto do valgrind) = 4.00 de 8.0 pontos.
+ - Pasta completo / Caso 6:
+ - Resultado para o saida.txt: Ok! Peso: 3.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/6/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/6/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/6/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/6/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 4.00 (soma total) - 0% (desconto do valgrind) = 4.00 de 8.0 pontos.
+ - Pasta completo / Caso 7:
+ - Resultado para o saida.txt: Ok! Peso: 3.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/7/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/7/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/7/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/7/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 4.00 (soma total) - 0% (desconto do valgrind) = 4.00 de 8.0 pontos.
+ - Pasta completo / Caso 8:
+ - Resultado para o saida.txt: Incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/8/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/8/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/8/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/8/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 1.00 (soma total) - 0% (desconto do valgrind) = 1.00 de 8.0 pontos.
+ - Pasta completo / Caso 9:
+ - Resultado para o saida.txt: Incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/9/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/9/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/9/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/9/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 1.00 (soma total) - 0% (desconto do valgrind) = 1.00 de 8.0 pontos.
+ - Pasta completo / Caso bonus_1:
+ - Resultado para o saida.txt: Ok! Peso: 3.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/bonus_1/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/bonus_1/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/bonus_1/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/bonus_1/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 4.00 (soma total) - 0% (desconto do valgrind) = 4.00 de 8.0 pontos.
+ - Pasta completo / Caso bonus_2:
+ - Resultado para o saida.txt: Ok! Peso: 3.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/bonus_2/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/bonus_2/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/bonus_2/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/bonus_2/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 4.00 (soma total) - 0% (desconto do valgrind) = 4.00 de 8.0 pontos.
+ - Pasta completo / Caso bonus_3:
+ - Resultado para o saida.txt: Incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/bonus_3/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/bonus_3/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/bonus_3/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/bonus_3/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 1.00 (soma total) - 0% (desconto do valgrind) = 1.00 de 8.0 pontos.
+ - Pasta completo / Caso bonus_4:
+ - Resultado para o saida.txt: Incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/bonus_4/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/bonus_4/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/bonus_4/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/bonus_4/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 1.00 (soma total) - 0% (desconto do valgrind) = 1.00 de 8.0 pontos.
+ - Pasta completo / Caso bonus_5:
+ - Resultado para o saida.txt: Incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/bonus_5/saida/estatisticas.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/bonus_5/saida/heatmap.txt, considerando resultado incorreto! Peso: 0.0
+ - Resultado para o inicializacao.txt: Ok! Peso: 1.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/bonus_5/saida/ranking.txt, considerando resultado incorreto! Peso: 0.0
+ - O aluno não gerou o arquivo de saída Resultados/PauloSergioAmorimMonico/completo/Casos/bonus_5/saida/resumo.txt, considerando resultado incorreto! Peso: 0.0
+ - Nota para o Caso (soma dos pesos): 1.00 (soma total) - 0% (desconto do valgrind) = 1.00 de 8.0 pontos.
+ - Nota para a pasta completo (máximo 11.0) - 89.00 de 208.0 - 42.00% de 11.0: 4.62.
+ -----
+
+#######################################
+RESULTADOS FINAIS
+#######################################
+
+----------------------------------------------------------------------------
+Aluno: PauloSergioAmorimMonico
+ - Arquivos Esperados Corretos: 0 de 1
+ - Pastas Compiladas Corretamente: 1 de 1 
+ - Pastas Linkadas Corretamente: 1 de 1
+ - Teste completo
+ - Resultados corretos: 47 de 156
+ - Nota de PauloSergioAmorimMonico para o teste completo: 4.62
+ - Nota de PauloSergioAmorimMonico: 0+(4.62)
+ - Nota de PauloSergioAmorimMonico: 4.62
+
+----------------------------------------------------------------------------
+
+Arquivo CSV Resultado.csv com os resultados finais foi gerado na pasta raíz!
+
+
+

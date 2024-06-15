@@ -1,0 +1,1 @@
+[1] Inimigo de indice 1 da fileira 2 foi atingido na posicao (2 4).
