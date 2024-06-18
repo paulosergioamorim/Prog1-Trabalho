@@ -2,7 +2,7 @@ Arquivos Esperados Corretos: 0 de 1
 Pastas Compiladas Corretamente: 1 de 1 
 Pastas Linkadas Corretamente: 1 de 1
 Teste completo
-  - Resultados corretos: 47 de 156
-Nota de PauloSergioAmorimMonico para o teste completo: 4.62
-Nota de PauloSergioAmorimMonico: 0+(4.62)
-Nota de PauloSergioAmorimMonico: 4.62
+  - Resultados corretos: 70 de 156
+Nota de PauloSergioAmorimMonico para o teste completo: 6.27
+Nota de PauloSergioAmorimMonico: 0+(6.27)
+Nota de PauloSergioAmorimMonico: 6.27
