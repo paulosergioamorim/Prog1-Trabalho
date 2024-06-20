@@ -6,6 +6,7 @@
 #define ARQUIVO_INIMIGO "inimigo.txt"
 #define ARQUIVO_INICIALIZACAO "./saida/inicializacao.txt"
 #define ARQUIVO_RESUMO "./saida/resumo.txt"
+#define ARQUIVO_RANKING "./saida/ranking.txt"
 #define ARQUIVO_ENTRADA "entrada.txt"
 #define TAMANHO_MAX_LINHAS_CAMPO 42   // linhas + 2 bordas
 #define TAMANHO_MAX_COLUNAS_CAMPO 102 // colunas + 2 bordas
@@ -50,14 +51,23 @@ typedef struct
     char campo[TAMANHO_MAX_LINHAS_CAMPO][TAMANHO_MAX_COLUNAS_CAMPO];
 } tMapa;
 
+typedef struct Ranking
+{
+    tInimigo inimigo;
+    int linhaAtingido;
+    int interacaoAtingido;
+} tRanking;
+
 typedef struct
 {
     tMapa mapa;
     tInimigo inimigos[QUANTIDADE_MAX_INIMIGOS];
+    tRanking rankings[QUANTIDADE_MAX_INIMIGOS];
     tJogador jogador;
     tTiro tiro;
     int jogada;
     int qtdInimigos;
+    int qtdRankings;
     int direcaoInimigos;
     int animarInimigo;
     int animacaoAtual;
@@ -82,6 +92,7 @@ tPartida desenharTiro(tPartida partida);
 tPartida destruirInimigo(tPartida partida, int indiceInimigo);
 tPartida destruirTiro(tPartida partida);
 tPartida atribuirPontos(tPartida partida, int indiceInimigo);
+tPartida atribuirRanking(tPartida partida, tInimigo inimigo, int linhaAtingido);
 int eBorda(int i, int j, tMapa mapa);
 int eBordaVertical(int j, tMapa mapa);
 int eBordaHorizontal(int i, tMapa mapa);
@@ -96,7 +107,9 @@ int tocandoBordaDireita(int j, tMapa mapa);
 void salvarInicializacao(char const diretorio[], tPartida partida);
 void salvarResumoInimigo(char const diretorio[], tPartida partida, int evento, tInimigo inimigo);
 void salvarResumoJogador(char const diretorio[], tPartida partida, int evento);
+void salvarRankings(char const diretorio[], int qtdRankings, tRanking rankings[qtdRankings]);
 void imprimirMapa(tMapa mapa);
+void ordenarRankings(int qtdRankings, tRanking rankings[qtdRankings]);
 
 int main(int argc, char const *argv[])
 {
@@ -114,6 +127,8 @@ int main(int argc, char const *argv[])
     tPartida partida = criarPartida(diretorio);
     salvarInicializacao(diretorio, partida);
     partida = realizarPartida(diretorio, partida);
+    ordenarRankings(partida.qtdRankings, partida.rankings);
+    salvarRankings(diretorio, partida.qtdRankings, partida.rankings);
 
     return 0;
 }
@@ -209,7 +224,7 @@ tPartida criarInimigos(char const diretorio[], tPartida partida)
     char filePath[TAMANHO_MAX_DIRETORIO + strlen(ARQUIVO_MAPA)];
     sprintf(filePath, "%s/%s", diretorio, ARQUIVO_MAPA);
     pFile = fopen(filePath, "r");
-    fscanf(pFile, "%*[^\n]\n%*[^\n]\n");
+    fscanf(pFile, "%*[^\n]%*c%*[^\n]%*c");
 
     char lixo = 0;
     tInimigo inimigo;
@@ -218,16 +233,13 @@ tPartida criarInimigos(char const diretorio[], tPartida partida)
     inimigo.id = 1;
     for (int i = 0; !feof(pFile); inimigo.id++, partida.qtdInimigos++)
     {
-        if (i > 0)
+        fscanf(pFile, "%c", &lixo);
+        if (lixo == '\n')
         {
-            fscanf(pFile, "%c", &lixo);
-            if (lixo == '\n')
-            {
-                inimigo.fileira++;
-                inimigo.id = 1;
-            }
+            inimigo.fileira++;
+            inimigo.id = 1;
         }
-        if (fscanf(pFile, "(%d %d)", &inimigo.j, &inimigo.i) == 2)
+        if (fscanf(pFile, (i == 0 && lixo != '\n') ? "%d %d)" : "(%d %d)", &inimigo.j, &inimigo.i) == 2)
         {
             partida.inimigos[i] = inimigo;
             i++;
@@ -292,6 +304,8 @@ tPartida criarPartida(char const diretorio[])
 {
     tPartida partida;
 
+    partida.qtdInimigos = 0;
+    partida.qtdRankings = 0;
     partida.direcaoInimigos = DIRECAO_DIREITA;
     partida.animacaoAtual = 0;
     partida.pontos = 0;
@@ -338,6 +352,7 @@ tPartida realizarPartida(char const diretorio[], tPartida partida)
         {
             partida = atribuirPontos(partida, idInimigoAtingido);
             salvarResumoInimigo(diretorio, partida, RESUMO_INIMIGO_ATINGIDO, partida.inimigos[idInimigoAtingido]);
+            partida = atribuirRanking(partida, partida.inimigos[idInimigoAtingido], partida.mapa.l - partida.tiro.i);
             partida = destruirInimigo(partida, idInimigoAtingido);
             partida = destruirTiro(partida);
         }
@@ -586,4 +601,58 @@ void salvarResumoJogador(char const diretorio[], tPartida partida, int evento)
         fprintf(pFile, "[%d] Jogador colidiu na lateral esquerda.\n", partida.jogada + 1);
 
     fclose(pFile);
+}
+
+tPartida atribuirRanking(tPartida partida, tInimigo inimigo, int linhaAtingido)
+{
+    partida.rankings[partida.qtdRankings].inimigo = inimigo;
+    partida.rankings[partida.qtdRankings].interacaoAtingido = partida.jogada;
+    partida.rankings[partida.qtdRankings].linhaAtingido = linhaAtingido;
+    partida.qtdRankings++;
+
+    return partida;
+}
+
+void salvarRankings(char const diretorio[], int qtdRankings, tRanking rankings[qtdRankings])
+{
+    FILE *pFile;
+    char filePath[TAMANHO_MAX_DIRETORIO + strlen(ARQUIVO_RANKING)];
+    sprintf(filePath, "%s/%s", diretorio, ARQUIVO_RANKING);
+    pFile = fopen(filePath, "w+");
+    fprintf(pFile, "indice,fileira,linha,iteracao\n");
+    for (int i = 0; i < qtdRankings; i++)
+    {
+        tRanking ranking = rankings[i];
+        fprintf(pFile, "%d,%d,%d,%d\n", ranking.inimigo.id, ranking.inimigo.fileira, ranking.linhaAtingido, ranking.interacaoAtingido);
+    }
+    fclose(pFile);
+}
+
+void ordenarRankings(int qtdRankings, tRanking rankings[qtdRankings])
+{
+    for (int i = 0; i < qtdRankings; i++)
+    {
+        for (int j = i + 1; j < qtdRankings; j++)
+        {
+            if (rankings[i].linhaAtingido > rankings[j].linhaAtingido)
+            {
+                tRanking c = rankings[i];
+                rankings[i] = rankings[j];
+                rankings[j] = c;
+            }
+        }
+    }
+    for (int i = 0; i < qtdRankings; i++)
+    {
+        for (int j = i + 1; j < qtdRankings; j++)
+        {
+            if (rankings[i].linhaAtingido == rankings[j].linhaAtingido &&
+                rankings[i].interacaoAtingido > rankings[j].linhaAtingido)
+            {
+                tRanking c = rankings[i];
+                rankings[i] = rankings[j];
+                rankings[j] = c;
+            }
+        }
+    }
 }

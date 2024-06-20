@@ -1,17 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
+
 #define ARQUIVO_MAPA "mapa.txt"
 #define ARQUIVO_INIMIGO "inimigo.txt"
 #define ARQUIVO_INICIALIZACAO "./saida/inicializacao.txt"
+#define ARQUIVO_RESUMO "./saida/resumo.txt"
+#define ARQUIVO_RANKING "./saida/ranking.txt"
 #define ARQUIVO_ENTRADA "entrada.txt"
-#define TAMANHO_MAX_LINHAS_CAMPO 42
-#define TAMANHO_MAX_COLUNAS_CAMPO 102
-#define TAMANHO_MAX_DIRETORIO 1000
+#define TAMANHO_MAX_LINHAS_CAMPO 42   // linhas + 2 bordas
+#define TAMANHO_MAX_COLUNAS_CAMPO 102 // colunas + 2 bordas
+#define TAMANHO_MAX_DIRETORIO 1001    // diretorio + '/'
 #define QUANTIDADE_MAX_INIMIGOS 20
 #define DIRECAO_DIREITA 1
 #define DIRECAO_ESQUERDA -1
+#define RESUMO_INIMIGO_COLIDIU_DIREITA 0
+#define RESUMO_INIMIGO_COLIDIU_ESQUERDA 1
+#define RESUMO_INIMIGO_ATINGIDO 2
+#define RESUMO_JOGADOR_COLIDIU_ESQUERDA 3
+#define RESUMO_JOGADOR_COLIDIU_DIREITA 4
+#define RODAR_AUTOMATICAMENTE 0
+#define DIRETORIO_MANUAL "./teste"
 
 typedef struct
 {
@@ -29,6 +38,7 @@ typedef struct
 typedef struct
 {
     int id;
+    int fileira;
     int i;
     int j;
     int vivo;
@@ -41,13 +51,23 @@ typedef struct
     char campo[TAMANHO_MAX_LINHAS_CAMPO][TAMANHO_MAX_COLUNAS_CAMPO];
 } tMapa;
 
+typedef struct Ranking
+{
+    tInimigo inimigo;
+    int linhaAtingido;
+    int interacaoAtingido;
+} tRanking;
+
 typedef struct
 {
     tMapa mapa;
     tInimigo inimigos[QUANTIDADE_MAX_INIMIGOS];
+    tRanking rankings[QUANTIDADE_MAX_INIMIGOS];
     tJogador jogador;
     tTiro tiro;
+    int jogada;
     int qtdInimigos;
+    int qtdRankings;
     int direcaoInimigos;
     int animarInimigo;
     int animacaoAtual;
@@ -62,71 +82,84 @@ tPartida criarJogador(char const diretorio[], tPartida partida);
 tPartida desenharInimigos(char const diretorio[], tPartida partida);
 tPartida criarInimigos(char const diretorio[], tPartida partida);
 tPartida desenharJogador(tPartida partida);
-tPartida realizarJogo(char const diretorio[], tPartida partida);
-tPartida realizarJogada(char acao, tPartida partida);
-tPartida moverJogador(char acao, tPartida partida);
-tPartida moverInimigos(tPartida partida);
+tPartida realizarPartida(char const diretorio[], tPartida partida);
+tPartida realizarAcao(char const diretorio[], char acao, tPartida partida);
+tPartida moverJogador(char const diretorio[], char acao, tPartida partida);
+tPartida moverInimigos(char const diretorio[], tPartida partida);
 tPartida moverTiro(tPartida partida);
 tPartida dispararTiro(tPartida partida);
 tPartida desenharTiro(tPartida partida);
 tPartida destruirInimigo(tPartida partida, int indiceInimigo);
 tPartida destruirTiro(tPartida partida);
 tPartida atribuirPontos(tPartida partida, int indiceInimigo);
+tPartida atribuirRanking(tPartida partida, tInimigo inimigo, int linhaAtingido);
 int eBorda(int i, int j, tMapa mapa);
 int eBordaVertical(int j, tMapa mapa);
 int eBordaHorizontal(int i, tMapa mapa);
 int eCanto(int i, int j, tMapa mapa);
 int estaVivo(tInimigo inimigo);
 int algumInimigoVivo(tPartida partida);
-int algumInimigoUltrapassouOJogador(tPartida partida);
+int algumInimigoUltrapassouLinhaLimite(tPartida partida);
 int eAcaoValida(char acao);
 int atingiuInimigo(tPartida partida);
+int tocandoBordaEsquerda(int j, tMapa mapa);
+int tocandoBordaDireita(int j, tMapa mapa);
 void salvarInicializacao(char const diretorio[], tPartida partida);
+void salvarResumoInimigo(char const diretorio[], tPartida partida, int evento, tInimigo inimigo);
+void salvarResumoJogador(char const diretorio[], tPartida partida, int evento);
+void salvarRankings(char const diretorio[], int qtdRankings, tRanking rankings[qtdRankings]);
 void imprimirMapa(tMapa mapa);
+void ordenarRankings(int qtdRankings, tRanking rankings[qtdRankings]);
 
 int main(int argc, char const *argv[])
 {
+    char diretorio[TAMANHO_MAX_DIRETORIO];
+#if RODAR_AUTOMATICAMENTE
     if (argc < 2)
     {
         printf("ERRO: Informe o diretorio com os arquivos de configuracao.");
         return 1;
     }
-    char diretorio[TAMANHO_MAX_DIRETORIO];
     strcpy(diretorio, argv[1]);
+#else
+    strcpy(diretorio, DIRETORIO_MANUAL);
+#endif
     tPartida partida = criarPartida(diretorio);
     salvarInicializacao(diretorio, partida);
-    partida = realizarJogo(diretorio, partida);
+    partida = realizarPartida(diretorio, partida);
+    ordenarRankings(partida.qtdRankings, partida.rankings);
+    salvarRankings(diretorio, partida.qtdRankings, partida.rankings);
 
     return 0;
 }
 
 tPartida criarMapa(char const diretorio[], tPartida partida)
 {
-    FILE *pMapaFile;
+    FILE *pFile;
     char filePath[TAMANHO_MAX_DIRETORIO + strlen(ARQUIVO_MAPA)];
     sprintf(filePath, "%s/%s", diretorio, ARQUIVO_MAPA);
 
-    pMapaFile = fopen(filePath, "r");
+    pFile = fopen(filePath, "r");
 
-    fscanf(pMapaFile, "%d %d", &partida.mapa.c, &partida.mapa.l);
+    fscanf(pFile, "%d %d", &partida.mapa.c, &partida.mapa.l);
     partida.mapa.l += 2;
     partida.mapa.c += 2;
 
     partida = limparMapa(partida);
 
-    fclose(pMapaFile);
+    fclose(pFile);
 
     return partida;
 }
 
 tPartida criarJogador(char const diretorio[], tPartida partida)
 {
-    FILE *pMapaFile;
+    FILE *pFile;
     char filePath[TAMANHO_MAX_DIRETORIO + strlen(ARQUIVO_MAPA)];
     sprintf(filePath, "%s/%s", diretorio, ARQUIVO_MAPA);
-    pMapaFile = fopen(filePath, "r");
-    fscanf(pMapaFile, "%*[^\n]%*c(%d %d)", &partida.jogador.j, &partida.jogador.i);
-    fclose(pMapaFile);
+    pFile = fopen(filePath, "r");
+    fscanf(pFile, "%*[^\n]%*c(%d %d)", &partida.jogador.j, &partida.jogador.i);
+    fclose(pFile);
 
     return partida;
 }
@@ -187,22 +220,33 @@ tPartida desenharInimigos(char const diretorio[], tPartida partida)
 
 tPartida criarInimigos(char const diretorio[], tPartida partida)
 {
-    FILE *pMapaFile;
+    FILE *pFile;
     char filePath[TAMANHO_MAX_DIRETORIO + strlen(ARQUIVO_MAPA)];
     sprintf(filePath, "%s/%s", diretorio, ARQUIVO_MAPA);
-    pMapaFile = fopen(filePath, "r");
-    fscanf(pMapaFile, "%*[^\n]\n%*[^\n]\n");
+    pFile = fopen(filePath, "r");
+    fscanf(pFile, "%*[^\n]%*c%*[^\n]%*c");
 
+    char lixo = 0;
     tInimigo inimigo;
-    for (int i = 0; fscanf(pMapaFile, "(%d %d) ", &inimigo.j, &inimigo.i) == 2; i++)
+    inimigo.fileira = 1;
+    inimigo.vivo = 1;
+    inimigo.id = 1;
+    for (int i = 0; !feof(pFile); inimigo.id++, partida.qtdInimigos++)
     {
-        inimigo.id = i + 1;
-        inimigo.vivo = 1;
-        partida.inimigos[i] = inimigo;
-        partida.qtdInimigos++;
+        fscanf(pFile, "%c", &lixo);
+        if (lixo == '\n')
+        {
+            inimigo.fileira++;
+            inimigo.id = 1;
+        }
+        if (fscanf(pFile, (i == 0 && lixo == '(') ? "%d %d)" : "(%d %d)", &inimigo.j, &inimigo.i) == 2)
+        {
+            partida.inimigos[i] = inimigo;
+            i++;
+        }
     }
 
-    fclose(pMapaFile);
+    fclose(pFile);
 
     return partida;
 }
@@ -260,6 +304,8 @@ tPartida criarPartida(char const diretorio[])
 {
     tPartida partida;
 
+    partida.qtdInimigos = 0;
+    partida.qtdRankings = 0;
     partida.direcaoInimigos = DIRECAO_DIREITA;
     partida.animacaoAtual = 0;
     partida.pontos = 0;
@@ -279,54 +325,52 @@ int estaVivo(tInimigo inimigo)
     return inimigo.vivo;
 }
 
-tPartida realizarJogo(char const diretorio[], tPartida partida)
+tPartida realizarPartida(char const diretorio[], tPartida partida)
 {
-    FILE *pEntradaFile;
+    FILE *pFile;
     char filePath[TAMANHO_MAX_DIRETORIO + strlen(ARQUIVO_ENTRADA)];
     sprintf(filePath, "%s/%s", diretorio, ARQUIVO_ENTRADA);
-    pEntradaFile = fopen(filePath, "r");
+    pFile = fopen(filePath, "r");
     char acao = 0;
-    int indiceInimigoAtingido = -1;
+    int idInimigoAtingido = -1;
 
-    printf("Pontos: 0 | Iteracoes: 0\n");
-    imprimirMapa(partida.mapa);
-
-    for (int i = 1; 1; i++)
+    for (partida.jogada = 0; 1; partida.jogada++)
     {
-        acao = fgetc(pEntradaFile);
+        printf("Pontos: %d | Iteracoes: %d\n", partida.pontos, partida.jogada);
+        imprimirMapa(partida.mapa);
         if (!algumInimigoVivo(partida))
         {
             printf("Parabéns, você ganhou!\n");
             return partida;
         }
-        if (algumInimigoUltrapassouOJogador(partida))
+        if (algumInimigoUltrapassouLinhaLimite(partida))
         {
             printf("Você perdeu, tente novamente!\n");
             return partida;
         }
-        if ((indiceInimigoAtingido = atingiuInimigo(partida)) != -1)
+        if ((idInimigoAtingido = atingiuInimigo(partida)) != -1)
         {
-            partida = atribuirPontos(partida, indiceInimigoAtingido);
-            partida = destruirInimigo(partida, indiceInimigoAtingido);
+            partida = atribuirPontos(partida, idInimigoAtingido);
+            salvarResumoInimigo(diretorio, partida, RESUMO_INIMIGO_ATINGIDO, partida.inimigos[idInimigoAtingido]);
+            partida = atribuirRanking(partida, partida.inimigos[idInimigoAtingido], partida.mapa.l - partida.tiro.i);
+            partida = destruirInimigo(partida, idInimigoAtingido);
             partida = destruirTiro(partida);
         }
+        while ((acao = fgetc(pFile)) == '\n')
+            ;
+        partida = moverInimigos(diretorio, partida);
         partida = moverTiro(partida);
-        partida = realizarJogada(acao, partida);
-        partida = moverInimigos(partida);
+        partida = realizarAcao(diretorio, acao, partida);
         partida = limparMapa(partida);
         partida = desenharJogador(partida);
         partida = desenharInimigos(diretorio, partida);
         partida = desenharTiro(partida);
-        printf("Pontos: %d | Iteracoes: %d\n", partida.pontos, i);
-        imprimirMapa(partida.mapa);
-        while (acao != '\n')
-            acao = fgetc(pEntradaFile);
     }
 
     return partida;
 }
 
-tPartida realizarJogada(char acao, tPartida partida)
+tPartida realizarAcao(char const diretorio[], char acao, tPartida partida)
 {
     if (!eAcaoValida(acao))
         return partida;
@@ -337,22 +381,28 @@ tPartida realizarJogada(char acao, tPartida partida)
     if (acao == ' ')
         return dispararTiro(partida);
 
-    return moverJogador(acao, partida);
+    return moverJogador(diretorio, acao, partida);
 }
 
-tPartida moverJogador(char acao, tPartida partida)
+tPartida moverJogador(char const diretorio[], char acao, tPartida partida)
 {
     if (acao == 'a')
     {
-        if (eBordaVertical(partida.jogador.j - 2, partida.mapa))
+        if (tocandoBordaEsquerda(partida.jogador.j, partida.mapa))
+        {
+            salvarResumoJogador(diretorio, partida, RESUMO_JOGADOR_COLIDIU_ESQUERDA);
             return partida;
+        }
         partida.jogador.j--;
         return partida;
     }
     else if (acao == 'd')
     {
-        if (eBordaVertical(partida.jogador.j + 2, partida.mapa))
+        if (tocandoBordaDireita(partida.jogador.j, partida.mapa))
+        {
+            salvarResumoJogador(diretorio, partida, RESUMO_JOGADOR_COLIDIU_DIREITA);
             return partida;
+        }
         partida.jogador.j++;
         return partida;
     }
@@ -360,44 +410,51 @@ tPartida moverJogador(char acao, tPartida partida)
     return partida;
 }
 
-tPartida moverInimigos(tPartida partida)
+tPartida moverInimigos(char const diretorio[], tPartida partida)
 {
     for (int i = 0; i < partida.qtdInimigos; i++)
     {
         if (!estaVivo(partida.inimigos[i]))
             continue;
-        if (partida.direcaoInimigos == DIRECAO_DIREITA)
+        if (partida.direcaoInimigos == DIRECAO_DIREITA && tocandoBordaDireita(partida.inimigos[i].j, partida.mapa))
         {
-            if (eBordaVertical(partida.inimigos[i].j + 2, partida.mapa))
+            for (int j = 0; j < partida.qtdInimigos; j++)
             {
-                for (int j = 0; j < partida.qtdInimigos; j++)
-                {
-                    if (!estaVivo(partida.inimigos[i]))
-                        continue;
-                    partida.inimigos[j].i++;
-                }
-                partida.direcaoInimigos = DIRECAO_ESQUERDA;
-                return partida;
+                if (!estaVivo(partida.inimigos[j]))
+                    continue;
+                partida.inimigos[j].i++;
+                if (tocandoBordaDireita(partida.inimigos[j].j, partida.mapa))
+                    salvarResumoInimigo(diretorio, partida, RESUMO_INIMIGO_COLIDIU_DIREITA, partida.inimigos[i]);
+                if (tocandoBordaEsquerda(partida.inimigos[j].j, partida.mapa))
+                    salvarResumoInimigo(diretorio, partida, RESUMO_INIMIGO_COLIDIU_ESQUERDA, partida.inimigos[i]);
             }
+            partida.direcaoInimigos = DIRECAO_ESQUERDA;
+            return partida;
         }
-        if (partida.direcaoInimigos == DIRECAO_ESQUERDA)
+        if (partida.direcaoInimigos == DIRECAO_ESQUERDA && tocandoBordaEsquerda(partida.inimigos[i].j, partida.mapa))
         {
-            if (eBordaVertical(partida.inimigos[i].j - 2, partida.mapa))
+            for (int j = 0; j < partida.qtdInimigos; j++)
             {
-                for (int j = 0; j < partida.qtdInimigos; j++)
-                {
-                    if (!estaVivo(partida.inimigos[i]))
-                        continue;
-                    partida.inimigos[j].i++;
-                }
-                partida.direcaoInimigos = DIRECAO_DIREITA;
-                return partida;
+                if (!estaVivo(partida.inimigos[j]))
+                    continue;
+                partida.inimigos[j].i++;
+                if (tocandoBordaDireita(partida.inimigos[j].j, partida.mapa))
+                    salvarResumoInimigo(diretorio, partida, RESUMO_INIMIGO_COLIDIU_DIREITA, partida.inimigos[i]);
+                if (tocandoBordaEsquerda(partida.inimigos[j].j, partida.mapa))
+                    salvarResumoInimigo(diretorio, partida, RESUMO_INIMIGO_COLIDIU_ESQUERDA, partida.inimigos[i]);
             }
+            partida.direcaoInimigos = DIRECAO_DIREITA;
+            return partida;
         }
     }
 
     for (int i = 0; i < partida.qtdInimigos; i++)
-        partida.inimigos[i].j += partida.direcaoInimigos;
+    {
+        if (estaVivo(partida.inimigos[i]))
+        {
+            partida.inimigos[i].j += partida.direcaoInimigos;
+        }
+    }
 
     return partida;
 }
@@ -500,10 +557,106 @@ tPartida limparMapa(tPartida partida)
     return partida;
 }
 
-int algumInimigoUltrapassouOJogador(tPartida partida)
+int algumInimigoUltrapassouLinhaLimite(tPartida partida)
 {
     for (int i = 0; i < partida.qtdInimigos; i++)
         if (estaVivo(partida.inimigos[i]) && partida.inimigos[i].i + 1 == partida.jogador.i - 1)
             return 1;
     return 0;
+}
+
+int tocandoBordaEsquerda(int j, tMapa mapa)
+{
+    return eBordaVertical(j - 2, mapa);
+}
+
+int tocandoBordaDireita(int j, tMapa mapa)
+{
+    return eBordaVertical(j + 2, mapa);
+}
+
+void salvarResumoInimigo(char const diretorio[], tPartida partida, int evento, tInimigo inimigo)
+{
+    FILE *pFile;
+    char filePath[TAMANHO_MAX_DIRETORIO + strlen(ARQUIVO_RESUMO)];
+    sprintf(filePath, "%s/%s", diretorio, ARQUIVO_RESUMO);
+    pFile = fopen(filePath, "a+");
+
+    if (evento == RESUMO_INIMIGO_COLIDIU_DIREITA)
+        fprintf(pFile, "[%d] Inimigo de indice %d da fileira %d colidiu na lateral direita.\n", partida.jogada, inimigo.id, inimigo.fileira);
+    else if (evento == RESUMO_INIMIGO_COLIDIU_ESQUERDA)
+        fprintf(pFile, "[%d] Inimigo de indice %d da fileira %d colidiu na lateral esquerda.\n", partida.jogada, inimigo.id, inimigo.fileira);
+    else if (evento == RESUMO_INIMIGO_ATINGIDO)
+        fprintf(pFile, "[%d] Inimigo de indice %d da fileira %d foi atingido na posicao (%d %d).\n", partida.jogada, inimigo.id, inimigo.fileira, partida.tiro.j, partida.tiro.i);
+
+    fclose(pFile);
+}
+
+void salvarResumoJogador(char const diretorio[], tPartida partida, int evento)
+{
+    FILE *pFile;
+    char filePath[TAMANHO_MAX_DIRETORIO + strlen(ARQUIVO_RESUMO)];
+    sprintf(filePath, "%s/%s", diretorio, ARQUIVO_RESUMO);
+    pFile = fopen(filePath, "a+");
+
+    if (evento == RESUMO_JOGADOR_COLIDIU_DIREITA)
+        fprintf(pFile, "[%d] Jogador colidiu na lateral direita.\n", partida.jogada + 1);
+    else if (evento == RESUMO_JOGADOR_COLIDIU_ESQUERDA)
+        fprintf(pFile, "[%d] Jogador colidiu na lateral esquerda.\n", partida.jogada + 1);
+
+    fclose(pFile);
+}
+
+tPartida atribuirRanking(tPartida partida, tInimigo inimigo, int linhaAtingido)
+{
+    partida.rankings[partida.qtdRankings].inimigo = inimigo;
+    partida.rankings[partida.qtdRankings].interacaoAtingido = partida.jogada;
+    partida.rankings[partida.qtdRankings].linhaAtingido = linhaAtingido - 1;
+    partida.qtdRankings++;
+
+    return partida;
+}
+
+void salvarRankings(char const diretorio[], int qtdRankings, tRanking rankings[qtdRankings])
+{
+    FILE *pFile;
+    char filePath[TAMANHO_MAX_DIRETORIO + strlen(ARQUIVO_RANKING)];
+    sprintf(filePath, "%s/%s", diretorio, ARQUIVO_RANKING);
+    pFile = fopen(filePath, "w+");
+    fprintf(pFile, "indice,fileira,linha,iteracao\n");
+    for (int i = 0; i < qtdRankings; i++)
+    {
+        tRanking ranking = rankings[i];
+        fprintf(pFile, "%d,%d,%d,%d\n", ranking.inimigo.id, ranking.inimigo.fileira, ranking.linhaAtingido, ranking.interacaoAtingido);
+    }
+    fclose(pFile);
+}
+
+void ordenarRankings(int qtdRankings, tRanking rankings[qtdRankings])
+{
+    for (int i = 0; i < qtdRankings; i++)
+    {
+        for (int j = i + 1; j < qtdRankings; j++)
+        {
+            if (rankings[i].linhaAtingido > rankings[j].linhaAtingido)
+            {
+                tRanking c = rankings[i];
+                rankings[i] = rankings[j];
+                rankings[j] = c;
+            }
+        }
+    }
+    for (int i = 0; i < qtdRankings; i++)
+    {
+        for (int j = i + 1; j < qtdRankings; j++)
+        {
+            if (rankings[i].linhaAtingido == rankings[j].linhaAtingido &&
+                rankings[i].interacaoAtingido > rankings[j].interacaoAtingido)
+            {
+                tRanking c = rankings[i];
+                rankings[i] = rankings[j];
+                rankings[j] = c;
+            }
+        }
+    }
 }
