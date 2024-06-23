@@ -10,13 +10,23 @@
 #define FILE_INIT "./saida/inicializacao.txt"
 #define FILE_RESUME "./saida/resumo.txt"
 #define FILE_RANKING "./saida/ranking.txt"
-#define FILE_STATISTICS "./saida/estatiscas.txt"
+#define FILE_STATISTICS "./saida/estatisticas.txt"
 #define FILE_HEATMAP "./saida/heatmap.txt"
 #define DIRECTION_RIGHT 1
 #define DIRECTION_LEFT -1
 #define NOT_HITTED -1
 #define DIR_MAX_LENGTH 1000
 #define ENEMIES_MAX_COUNT 100
+#define RESUME_NONE 0
+#define RESUME_ENEMY_HITTED 1
+#define RESUME_ENEMY_TOUCHING_LEFT_BORDER 2
+#define RESUME_ENEMY_TOUCHING_RIGHT_BORDER 3
+#define RESUME_PLAYER_TOUCHING_LEFT_BORDER 4
+#define RESUME_PLAYER_TOUCHING_RIGHT_BORDER 5
+#define STATISTICS_PLAYER_MOVE 0
+#define STATISTICS_EFFECTIVE_SHOT 1
+#define STATISTICS_NON_EFFECTIVE_SHOT 2
+#define STATISTICS_ENEMIES_MOVE_DOWN 3
 
 typedef struct Player
 {
@@ -66,7 +76,7 @@ typedef struct Statistics
 {
     int playerMoves;
     int effectiveShots;
-    int notEffectiveShots;
+    int nonEffectiveShots;
     int enemiesMovesDown;
 } Statistics;
 
@@ -94,34 +104,77 @@ typedef struct Game
     int points;
 } Game;
 
+typedef struct MovePlayerResult
+{
+    Player player;
+    Statistics statistics;
+    int resumeEvent;
+} MovePlayerResult;
+
+typedef struct MoveEnemiesResult
+{
+    int enemiesDirection;
+    Statistics statistics;
+} MoveEnemiesResult;
+
+typedef struct ShotResult
+{
+    Shot shot;
+    Statistics statistics;
+} ShotResult;
+
+/// @brief Retorna um FILE pronto para ser utilizado com fscanf e fprintf, por exemplo.
+/// @param dir diretório que se procurará o arquivo
+/// @param fileName nome do arquivo
+/// @param modes modo em que o arquivo será aperto
+/// @return Interface *FILE inicializada
 FILE *createFile(char dir[], char fileName[], char modes[]);
-Player createPlayer(char dir[]);
-int createEnemies(char dir[], Enemy enemies[]);
-EnemyDraw createEnemyDraw(char dir[]);
+
+/// @brief Garante que o arquivo ./saida/resumo.txt seja criado mesmo que não haja resumo
+/// @param dir diretório que será criado o arquivo
+void createResumeFile(char dir[]);
+
+/// @brief Cria um jogo
+/// @param dir diretório raiz para inicializar o jogo 
+/// @return Jogo criado
 Game createGame(char dir[]);
-Map createMap(char dir[]);
-Map cleanMap(Map map);
-int calculatePlayerLimit(Player player);
-Map drawMatrix(Map map, int i, int j, char values[3][3]);
-Map drawPlayer(Map map, int i, int j);
-Map drawPlayerLimit(Map map, Player player);
-EnemyDraw advanceAnimation(EnemyDraw enemyDraw);
-Map drawEnemies(Map map, int enemiesCount, Enemy enemies[], EnemyDraw enemyDraw);
-Map drawShot(Map map, Shot shot);
+
+/// @brief Avança os estados do jogo até que o jogador vença ou perca
+/// @param dir diretório raiz para inicializar o jogo
+/// @param game jogo no seu estado atual
+/// @return Jogo finalizado
 Game playGame(char dir[], Game game);
-int moveEnemies(Map map, int enemiesCount, Enemy enemies[], int enemiesDirection);
-void moveDownEnemies(int enemiesCount, Enemy enemies[]);
-Shot moveShot(Shot shot);
-Shot shootShot(Shot shot, Player player);
-Player movePlayer(Map map, Player player, char action);
-void printGameState(Game game);
+
+/// @brief 
+/// @param game 
+/// @return 
 Game updateGameState(Game game);
-void printMap(Map map);
+void printGameState(Map map, int points, int iteration);
+int isValidAction(char action);
+
+MovePlayerResult movePlayer(Map map, Player player, char action, Statistics statistics);
+Player moveToLeft(Player player);
+Player moveToRigth(Player player);
+Player createPlayer(char dir[]);
+int calculatePlayerLimit(Player player);
+
+int createEnemies(char dir[], Enemy enemies[]);
+MoveEnemiesResult moveEnemies(char dir[], Map map, int enemiesCount, Enemy enemies[], int enemiesDirection, int iteration, Statistics statistics);
+void moveDownEnemies(char dir[], Map map, int enemiesCount, Enemy enemies[], int iteration, int enemiesDirection);
 int isAlive(Enemy enemy);
 int someEnemyAlive(int enemiesCount, Enemy enemies[]);
 int someEnemyCrossPlayerLimit(int enemiesCount, Enemy enemies[], Player player);
 int someEnemyHitted(int enemiesCount, Enemy enemies[], Shot shot);
 int calculatePoints(Map map, Enemy enemy);
+void killEnemy(Enemy enemies[], int id);
+
+Map createMap(char dir[]);
+Map cleanMap(Map map);
+Map drawMatrix(Map map, int i, int j, char values[3][3]);
+Map drawPlayer(Map map, Player player);
+Map drawPlayerLimit(Map map, Player player);
+Map drawEnemies(Map map, int enemiesCount, Enemy enemies[], EnemyDraw enemyDraw);
+Map drawShot(Map map, Shot shot);
 int isLeftBorder(int j);
 int isRightBorder(Map map, int j);
 int isHorizontalBorder(Map map, int i);
@@ -130,21 +183,57 @@ int isBorder(Map map, int i, int j);
 int isCorner(Map map, int i, int j);
 int isTouchingLeftBorder(int j);
 int isTouchingRightBorder(Map map, int j);
-int isValidAction(char action);
-void killEnemy(Enemy enemies[], int id);
+int isTouchingVerticalBorder(Map map, int j);
+void printMap(Map map);
+
+ShotResult moveShot(Shot shot, Statistics statistics);
+ShotResult shootShot(Shot shot, Player player, Statistics statistics);
 Shot disableShot(Shot shot);
-void generateInitialization(char dir[], Map map, Player player);
+int isActive(Shot shot);
+
+EnemyDraw createEnemyDraw(char dir[]);
+EnemyDraw advanceAnimation(EnemyDraw enemyDraw);
+
+int addEnemyRanking(int rankingsCount, Ranking rankings[], Map map, Enemy enemy, Shot shot, int iteration);
+void sortRankings(int rankingsCount, Ranking rankings[]);
+
+Statistics createStatistics();
+Statistics addStatistic(Statistics statistics, int event);
+
+Heatmap createHeatmap(Map map);
+Heatmap markHeatmap(Heatmap heatmap, int i, int j, int amountI, int amountJ);
+Heatmap markPlayer(Heatmap heatmap, Player player);
+Heatmap markShot(Heatmap heatmap, Shot shot);
+
+void saveInitialization(char dir[], Map map, Player player);
+void savePlayerTouchingBorderResume(char dir[], int iteration, Player player, int event);
+void saveEnemyHittedResume(char dir[], int iteration, Enemy enemy, Shot shot);
+void saveEnemyTouchingBorderResume(char dir[], int iteration, Enemy enemy, int event);
+void saveRankings(char dir[], int rankingsCount, Ranking rankings[]);
+void saveStatistics(char dir[], Statistics statistics);
+void saveHeatmap(char dir[], Heatmap heatmap);
 
 int main(int argc, char const *argv[])
 {
     char dir[DIR_MAX_LENGTH];
+#if 1
     if (argc < 2)
     {
         printf("ERRO: Informe o diretorio com os arquivos de configuracao.");
         return 1;
     }
     strcpy(dir, argv[1]);
+#else
+    strcpy(dir, "./teste");
+#endif
+    createResumeFile(dir);
     Game game = createGame(dir);
+    saveInitialization(dir, game.map, game.player);
+    game = playGame(dir, game);
+    sortRankings(game.rankingsCount, game.rankings);
+    saveRankings(dir, game.rankingsCount, game.rankings);
+    saveStatistics(dir, game.statistics);
+    saveHeatmap(dir, game.heatmap);
     return 0;
 }
 
@@ -183,11 +272,11 @@ Map cleanMap(Map map)
             {
                 map.values[i][j] = '+';
             }
-            else if (isHorizontalBorder(map, j))
+            else if (isHorizontalBorder(map, i))
             {
                 map.values[i][j] = '-';
             }
-            else if (isVerticalBorder(map, i))
+            else if (isVerticalBorder(map, j))
             {
                 map.values[i][j] = '|';
             }
@@ -205,7 +294,7 @@ Player createPlayer(char dir[])
     Player player;
     FILE *pFile = createFile(dir, FILE_MAP, "r");
     fscanf(pFile, "%*[^\n]%*c");
-    fscanf(pFile, &player.j, &player.i);
+    fscanf(pFile, "(%d %d)", &player.j, &player.i);
     fclose(pFile);
     return player;
 }
@@ -226,12 +315,13 @@ int createEnemies(char dir[], Enemy enemies[])
         if (c == '\n')
         {
             enemy.row++;
-            enemy.id++;
+            enemy.id = 1;
         }
-        if (fscanf(pFile, (enemiesCount == 0 && c == '(') ? "%d %d)" : "(%d %d)"), &enemy.j, &enemy.i)
+        if (fscanf(pFile, (enemiesCount == 0 && c == '(') ? "%d %d)" : "(%d %d)", &enemy.j, &enemy.i) == 2)
         {
             enemies[enemiesCount] = enemy;
             enemiesCount++;
+            enemy.id++;
         }
     }
     fclose(pFile);
@@ -250,7 +340,7 @@ EnemyDraw createEnemyDraw(char dir[])
         {
             for (int j = 0; j < 3; j++)
             {
-                fscanf(pFile, "%c", &enemyDraw.values[i][j][k]);
+                fscanf(pFile, "%c", &enemyDraw.values[k][i][j]);
                 if (j == 2)
                 {
                     fscanf(pFile, "%*c");
@@ -265,13 +355,15 @@ EnemyDraw createEnemyDraw(char dir[])
 Game createGame(char dir[])
 {
     Game game;
-    Player player;
     game.map = createMap(dir);
+    game.player = createPlayer(dir);
     game.enemyDraw = createEnemyDraw(dir);
     game.enemiesCount = createEnemies(dir, game.enemies);
+    game.heatmap = createHeatmap(game.map);
+    game.statistics = createStatistics();
     game.rankingsCount = 0;
     game.points = 0;
-    player = createPlayer(dir);
+    game.enemiesDirection = DIRECTION_RIGHT;
     game = updateGameState(game);
     return game;
 }
@@ -312,7 +404,7 @@ int someEnemyCrossPlayerLimit(int enemiesCount, Enemy enemies[], Player player)
 
 int someEnemyHitted(int enemiesCount, Enemy enemies[], Shot shot)
 {
-    if (!shot.active)
+    if (!isActive(shot))
         return NOT_HITTED;
     for (int id = 0; id < enemiesCount; id++)
     {
@@ -365,7 +457,7 @@ int isBorder(Map map, int i, int j)
 
 int isCorner(Map map, int i, int j)
 {
-    return isHorizontalBorder(map, j) && isVerticalBorder(map, i);
+    return isHorizontalBorder(map, i) && isVerticalBorder(map, j);
 }
 
 int isTouchingLeftBorder(int j)
@@ -403,10 +495,10 @@ Shot disableShot(Shot shot)
     return shot;
 }
 
-void generateInitialization(char dir[], Map map, Player player)
+void saveInitialization(char dir[], Map map, Player player)
 {
     FILE *pFile = createFile(dir, FILE_INIT, "w+");
-     for (int i = 0; i < map.l; i++)
+    for (int i = 0; i < map.l; i++)
         for (int j = 0; j < map.c; j++)
         {
             fprintf(pFile, "%c", map.values[i][j]);
@@ -428,16 +520,16 @@ Map drawMatrix(Map map, int i, int j, char values[3][3])
     {
         for (int b = j - 1; b <= j + 1; b++)
         {
-            map.values[i][j] = values[a - (i - 1)][b - (j - 1)];
+            map.values[a][b] = values[a - (i - 1)][b - (j - 1)];
         }
     }
     return map;
 }
 
-Map drawPlayer(Map map, int i, int j)
+Map drawPlayer(Map map, Player player)
 {
     char playerDraw[3][3] = {{'M', ' ', 'M'}, {'M', 'M', 'M'}, {'M', 'M', 'M'}};
-    map = drawMatrix(map, i, j, playerDraw);
+    map = drawMatrix(map, player.i, player.j, playerDraw);
     return map;
 }
 
@@ -474,6 +566,10 @@ Map drawEnemies(Map map, int enemiesCount, Enemy enemies[], EnemyDraw enemyDraw)
 
 Map drawShot(Map map, Shot shot)
 {
+    if (!isActive(shot))
+    {
+        return map;
+    }
     map.values[shot.i][shot.j] = 'o';
     return map;
 }
@@ -485,7 +581,7 @@ Game playGame(char dir[], Game game)
     int hittedEnemyId = NOT_HITTED;
     for (game.iteration = 0;; game.iteration++)
     {
-        printGameState(game);
+        printGameState(game.map, game.points, game.iteration);
         if (!someEnemyAlive(game.enemiesCount, game.enemies))
         {
             printf("Parabéns, você ganhou!\n");
@@ -498,25 +594,37 @@ Game playGame(char dir[], Game game)
         }
         if ((hittedEnemyId = someEnemyHitted(game.enemiesCount, game.enemies, game.shot)) != NOT_HITTED)
         {
-            game.points += calculatePoints(game.map, game.enemies[hittedEnemyId]);
+            Enemy hittedEnemy = game.enemies[hittedEnemyId];
+            game.points += calculatePoints(game.map, hittedEnemy);
+            saveEnemyHittedResume(dir, game.iteration, hittedEnemy, game.shot);
+            game.rankingsCount = addEnemyRanking(game.rankingsCount, game.rankings, game.map, hittedEnemy, game.shot, game.iteration);
             killEnemy(game.enemies, hittedEnemyId);
             game.shot = disableShot(game.shot);
         }
         do
         {
-            fscanf("%c", &action);
+            fscanf(pFile, "%c", &action);
         } while (action == '\n');
-        game.enemiesDirection = moveEnemies(game.map, game.enemiesCount, game.enemies, game.enemiesDirection);
-        game.shot = moveShot(game.shot);
+        MoveEnemiesResult moveEnemiesResult = moveEnemies(dir, game.map, game.enemiesCount, game.enemies, game.enemiesDirection, game.iteration, game.statistics);
+        game.enemiesDirection = moveEnemiesResult.enemiesDirection;
+        game.statistics = moveEnemiesResult.statistics;
+        ShotResult moveShotResult = moveShot(game.shot, game.statistics);
+        game.shot = moveShotResult.shot;
+        game.statistics = moveShotResult.statistics;
         if (isValidAction(action))
         {
             if (action == ' ')
             {
-                game.shot = shootShot(game.shot, game.player);
+                ShotResult shootShotResult = shootShot(game.shot, game.player, game.statistics);
+                game.shot = shootShotResult.shot;
+                game.statistics = shootShotResult.statistics;
             }
             if (action != 's')
             {
-                game.player = movePlayer(game.map, game.player, action);
+                MovePlayerResult movePlayerResult = movePlayer(game.map, game.player, action, game.statistics);
+                game.player = movePlayerResult.player;
+                game.statistics = movePlayerResult.statistics;
+                savePlayerTouchingBorderResume(dir, game.iteration, game.player, movePlayerResult.resumeEvent);
             }
         }
         game = updateGameState(game);
@@ -524,8 +632,11 @@ Game playGame(char dir[], Game game)
     fclose(pFile);
 }
 
-int moveEnemies(Map map, int enemiesCount, Enemy enemies[], int enemiesDirection)
+MoveEnemiesResult moveEnemies(char dir[], Map map, int enemiesCount, Enemy enemies[], int enemiesDirection, int iteration, Statistics statistics)
 {
+    MoveEnemiesResult result;
+    result.enemiesDirection = enemiesDirection;
+    result.statistics = statistics;
     for (int i = 0; i < enemiesCount; i++)
     {
         Enemy enemy = enemies[i];
@@ -535,28 +646,31 @@ int moveEnemies(Map map, int enemiesCount, Enemy enemies[], int enemiesDirection
         }
         if (enemiesDirection == DIRECTION_RIGHT && isTouchingRightBorder(map, enemy.j))
         {
-            moveDownEnemies(enemiesCount, enemies);
-            return DIRECTION_LEFT;
+            moveDownEnemies(dir, map, enemiesCount, enemies, iteration, enemiesDirection);
+            result.statistics = addStatistic(result.statistics, STATISTICS_ENEMIES_MOVE_DOWN);
+            result.enemiesDirection = DIRECTION_LEFT;
+            return result;
         }
         if (enemiesDirection == DIRECTION_LEFT && isTouchingLeftBorder(enemy.j))
         {
-            moveDownEnemies(enemiesCount, enemies);
-            return DIRECTION_RIGHT;
+            moveDownEnemies(dir, map, enemiesCount, enemies, iteration, enemiesDirection);
+            result.statistics = addStatistic(result.statistics, STATISTICS_ENEMIES_MOVE_DOWN);
+            result.enemiesDirection = DIRECTION_RIGHT;
+            return result;
         }
     }
     for (int i = 0; i < enemiesCount; i++)
     {
-        Enemy enemy = enemies[i];
-        if (!isAlive(enemy))
+        if (!isAlive(enemies[i]))
         {
             continue;
         }
-        enemy.j += enemiesDirection;
+        enemies[i].j += enemiesDirection;
     }
-    return enemiesDirection;
+    return result;
 }
 
-void moveDownEnemies(int enemiesCount, Enemy enemies[])
+void moveDownEnemies(char dir[], Map map, int enemiesCount, Enemy enemies[], int iteration, int enemiesDirection)
 {
     for (int i = 0; i < enemiesCount; i++)
     {
@@ -566,59 +680,114 @@ void moveDownEnemies(int enemiesCount, Enemy enemies[])
             continue;
         }
         enemy.i++;
+        if (isTouchingVerticalBorder(map, enemy.j))
+        {
+            if (enemiesDirection == DIRECTION_LEFT && isTouchingLeftBorder(enemy.j))
+            {
+                saveEnemyTouchingBorderResume(dir, iteration, enemy, RESUME_ENEMY_TOUCHING_LEFT_BORDER);
+            }
+            else if (enemiesDirection == DIRECTION_RIGHT && isTouchingRightBorder(map, enemy.j))
+            {
+                saveEnemyTouchingBorderResume(dir, iteration, enemy, RESUME_ENEMY_TOUCHING_RIGHT_BORDER);
+            }
+        }
         enemies[i] = enemy;
     }
 }
 
-Shot moveShot(Shot shot)
+ShotResult moveShot(Shot shot, Statistics statistics)
 {
-    if (!shot.active)
+    ShotResult result;
+    result.shot = shot;
+    result.statistics = statistics;
+    if (!isActive(shot))
     {
-        return shot;
+        return result;
     }
     shot.i--;
+    result.shot = shot;
     if (shot.i == 0)
     {
-        shot = disableShot(shot);
+        result.shot = disableShot(result.shot);
+        result.statistics = addStatistic(result.statistics, STATISTICS_NON_EFFECTIVE_SHOT);
     }
-    return shot;
+    return result;
 }
 
-Shot shootShot(Shot shot, Player player)
+ShotResult shootShot(Shot shot, Player player, Statistics statistics)
 {
+    ShotResult result;
+    result.shot = shot;
+    result.statistics = statistics;
+    if (isActive(shot))
+    {
+        return result;
+    }
     shot.active = 1;
     shot.i = calculatePlayerLimit(player);
     shot.j = player.j;
-    return shot;
+    result.shot = shot;
+    result.statistics = addStatistic(result.statistics, STATISTICS_EFFECTIVE_SHOT);
+    return result;
 }
 
-Player movePlayer(Map map, Player player, char action)
+MovePlayerResult movePlayer(Map map, Player player, char action, Statistics statistics)
 {
-    if (action == 'a' && !isTouchingLeftBorder(player.j))
+    MovePlayerResult result;
+    result.player = player;
+    result.statistics = statistics;
+    result.resumeEvent = RESUME_NONE;
+    if (action == 'a')
     {
-        player.j--;
+        if (isTouchingLeftBorder(player.j))
+        {
+            result.resumeEvent = RESUME_PLAYER_TOUCHING_LEFT_BORDER;
+            return result;
+        }
+        result.statistics = addStatistic(result.statistics, STATISTICS_PLAYER_MOVE);
+        result.player = moveToLeft(result.player);
     }
-    else if (action == 'd' && !isTouchingRightBorder(map, player.j))
+    else if (action == 'd')
     {
-        player.j++;
+        if (isTouchingRightBorder(map, player.j))
+        {
+            result.resumeEvent = RESUME_PLAYER_TOUCHING_RIGHT_BORDER;
+            return result;
+        }
+        result.statistics = addStatistic(result.statistics, STATISTICS_PLAYER_MOVE);
+        result.player = moveToRigth(result.player);
     }
+    return result;
+}
+
+Player moveToLeft(Player player)
+{
+    player.j--;
     return player;
 }
 
-void printGameState(Game game)
+Player moveToRigth(Player player)
 {
-    printf("Pontos: %d | Iteracoes: %d", game.points, game.iteration);
-    printMap(game.map);
+    player.j++;
+    return player;
+}
+
+void printGameState(Map map, int points, int iteration)
+{
+    printf("Pontos: %d | Iteracoes: %d\n", points, iteration);
+    printMap(map);
 }
 
 Game updateGameState(Game game)
 {
-    Player player = game.player;
     game.map = cleanMap(game.map);
-    game.map = drawPlayer(game.map, player.i, player.j);
-    game.map = drawPlayerLimit(game.map, player);
+    game.map = drawPlayer(game.map, game.player);
+    game.heatmap = markPlayer(game.heatmap, game.player);
+    game.map = drawPlayerLimit(game.map, game.player);
     game.map = drawEnemies(game.map, game.enemiesCount, game.enemies, game.enemyDraw);
     game.map = drawShot(game.map, game.shot);
+    game.heatmap = markShot(game.heatmap, game.shot);
+    game.enemyDraw = advanceAnimation(game.enemyDraw);
     return game;
 }
 
@@ -628,9 +797,193 @@ void printMap(Map map)
     {
         for (int j = 0; j < map.c; j++)
         {
-            printf("%c", getMapValue(map, i, j));
+            printf("%c", map.values[i][j]);
             if (j == map.c - 1)
                 printf("\n");
         }
     }
+}
+
+void savePlayerTouchingBorderResume(char dir[], int iteration, Player player, int event)
+{
+    FILE *pFile = createFile(dir, FILE_RESUME, "a+");
+    if (event == RESUME_PLAYER_TOUCHING_LEFT_BORDER)
+    {
+        fprintf(pFile, "[%d] Jogador colidiu na lateral esquerda.\n", iteration + 1);
+    }
+    else if (event == RESUME_PLAYER_TOUCHING_RIGHT_BORDER)
+    {
+        fprintf(pFile, "[%d] Jogador colidiu na lateral direita.\n", iteration + 1);
+    }
+    fclose(pFile);
+}
+
+void saveEnemyHittedResume(char dir[], int iteration, Enemy enemy, Shot shot)
+{
+    FILE *pFile = createFile(dir, FILE_RESUME, "a+");
+    fprintf(pFile, "[%d] Inimigo de indice %d da fileira %d foi atingido na posicao (%d %d).\n", iteration, enemy.id, enemy.row, shot.j, shot.i);
+    fclose(pFile);
+}
+
+void saveEnemyTouchingBorderResume(char dir[], int iteration, Enemy enemy, int event)
+{
+    FILE *pFile = createFile(dir, FILE_RESUME, "a+");
+    if (event == RESUME_ENEMY_TOUCHING_RIGHT_BORDER)
+    {
+        fprintf(pFile, "[%d] Inimigo de indice %d da fileira %d colidiu na lateral direita.\n", iteration, enemy.id, enemy.row);
+    }
+    else if (event == RESUME_ENEMY_TOUCHING_LEFT_BORDER)
+    {
+        fprintf(pFile, "[%d] Inimigo de indice %d da fileira %d colidiu na lateral esquerda.\n", iteration, enemy.id, enemy.row);
+    }
+    fclose(pFile);
+}
+
+int isTouchingVerticalBorder(Map map, int j)
+{
+    return isTouchingLeftBorder(j) || isTouchingRightBorder(map, j);
+}
+
+int addEnemyRanking(int rankingsCount, Ranking rankings[], Map map, Enemy enemy, Shot shot, int iteration)
+{
+    Ranking ranking;
+    ranking.id = enemy.id;
+    ranking.row = enemy.row;
+    ranking.line = map.l - shot.i - 1;
+    ranking.iteration = iteration;
+    rankings[rankingsCount] = ranking;
+    rankingsCount++;
+    return rankingsCount;
+}
+
+void saveRankings(char dir[], int rankingsCount, Ranking rankings[])
+{
+    FILE *pFile = createFile(dir, FILE_RANKING, "w+");
+    fprintf(pFile, "indice,fileira,linha,iteracao\n");
+    for (int i = 0; i < rankingsCount; i++)
+    {
+        Ranking ranking = rankings[i];
+        fprintf(pFile, "%d,%d,%d,%d\n", ranking.id, ranking.row, ranking.line, ranking.iteration);
+    }
+    fclose(pFile);
+}
+
+void sortRankings(int rankingsCount, Ranking rankings[])
+{
+    for (int i = 0; i < rankingsCount; i++)
+    {
+        for (int j = i + 1; j < rankingsCount; j++)
+        {
+            if (rankings[i].line > rankings[j].line || (rankings[i].line == rankings[j].line && rankings[i].iteration > rankings[j].iteration))
+            {
+                Ranking c = rankings[i];
+                rankings[i] = rankings[j];
+                rankings[j] = c;
+            }
+        }
+    }
+}
+
+Statistics createStatistics()
+{
+    Statistics statistics = {0, 0, 0, 0};
+    return statistics;
+}
+
+Statistics addStatistic(Statistics statistics, int event)
+{
+    switch (event)
+    {
+    case STATISTICS_PLAYER_MOVE:
+        statistics.playerMoves++;
+        return statistics;
+    case STATISTICS_EFFECTIVE_SHOT:
+        statistics.effectiveShots++;
+        return statistics;
+    case STATISTICS_NON_EFFECTIVE_SHOT:
+        statistics.nonEffectiveShots++;
+        return statistics;
+    case STATISTICS_ENEMIES_MOVE_DOWN:
+        statistics.enemiesMovesDown++;
+        return statistics;
+    default:
+        return statistics;
+    }
+}
+
+void saveStatistics(char dir[], Statistics statistics)
+{
+    FILE *pFile = createFile(dir, FILE_STATISTICS, "w+");
+    fprintf(pFile, "Numero total de movimentos (A ou D): %d;\n", statistics.playerMoves);
+    fprintf(pFile, "Numero de tiros efetivos: %d;\n", statistics.effectiveShots);
+    fprintf(pFile, "Numero de tiros que nao acertaram: %d;\n", statistics.nonEffectiveShots);
+    fprintf(pFile, "Numero de descidas dos inimigos: %d;", statistics.enemiesMovesDown);
+    fclose(pFile);
+}
+
+int isActive(Shot shot)
+{
+    return shot.active;
+}
+
+Heatmap createHeatmap(Map map)
+{
+    Heatmap heatmap;
+    heatmap.c = map.c - 2;
+    heatmap.l = map.l - 2;
+    for (int i = 0; i < heatmap.l; i++)
+    {
+        for (int j = 0; j < heatmap.c; j++)
+        {
+            heatmap.values[i][j] = 0;
+        }
+    }
+    return heatmap;
+}
+
+Heatmap markHeatmap(Heatmap heatmap, int i, int j, int amountI, int amountJ)
+{
+    for (int a = i - amountI; a <= i + amountI; a++)
+    {
+        for (int b = j - amountJ; b <= j + amountJ; b++)
+        {
+            if (heatmap.values[a][b] < 999)
+                heatmap.values[a][b]++;
+        }
+    }
+    return heatmap;
+}
+
+void saveHeatmap(char dir[], Heatmap heatmap)
+{
+    FILE *pFile = createFile(dir, FILE_HEATMAP, "w+");
+    for (int i = 0; i < heatmap.l; i++)
+    {
+        for (int j = 0; j < heatmap.c; j++)
+        {
+            fprintf(pFile, "%3d ", heatmap.values[i][j]);
+            if (j == heatmap.c - 1)
+                fprintf(pFile, "\n");
+        }
+    }
+    fclose(pFile);
+}
+
+void createResumeFile(char dir[])
+{
+    FILE *pFile = createFile(dir, FILE_RESUME, "w+");
+    fclose(pFile);
+}
+
+Heatmap markPlayer(Heatmap heatmap, Player player)
+{
+    heatmap = markHeatmap(heatmap, player.i - 1, player.j - 1, 1, 1);
+    return heatmap;
+}
+
+Heatmap markShot(Heatmap heatmap, Shot shot)
+{
+    if (isActive(shot))
+        heatmap = markHeatmap(heatmap, shot.i - 1, shot.j - 1, 0, 0);
+    return heatmap;
 }

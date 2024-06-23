@@ -1,2 +1,0 @@
-[1] Jogador colidiu na lateral direita.
-[2] Jogador colidiu na lateral esquerda.

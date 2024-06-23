@@ -11,7 +11,7 @@
 #define TAMANHO_MAX_LINHAS_CAMPO 42   // linhas + 2 bordas
 #define TAMANHO_MAX_COLUNAS_CAMPO 102 // colunas + 2 bordas
 #define TAMANHO_MAX_DIRETORIO 1001    // diretorio + '/'
-#define QUANTIDADE_MAX_INIMIGOS 20
+#define QUANTIDADE_MAX_INIMIGOS 100
 #define DIRECAO_DIREITA 1
 #define DIRECAO_ESQUERDA -1
 #define RESUMO_INIMIGO_COLIDIU_DIREITA 0
@@ -19,7 +19,7 @@
 #define RESUMO_INIMIGO_ATINGIDO 2
 #define RESUMO_JOGADOR_COLIDIU_ESQUERDA 3
 #define RESUMO_JOGADOR_COLIDIU_DIREITA 4
-#define RODAR_AUTOMATICAMENTE 0
+#define RODAR_AUTOMATICAMENTE 1
 #define DIRETORIO_MANUAL "./teste"
 
 typedef struct
@@ -416,34 +416,20 @@ tPartida moverInimigos(char const diretorio[], tPartida partida)
     {
         if (!estaVivo(partida.inimigos[i]))
             continue;
-        if (partida.direcaoInimigos == DIRECAO_DIREITA && tocandoBordaDireita(partida.inimigos[i].j, partida.mapa))
+        if ((partida.direcaoInimigos == DIRECAO_DIREITA && tocandoBordaDireita(partida.inimigos[i].j, partida.mapa)) ||
+            (partida.direcaoInimigos == DIRECAO_ESQUERDA && tocandoBordaEsquerda(partida.inimigos[i].j, partida.mapa)))
         {
             for (int j = 0; j < partida.qtdInimigos; j++)
             {
                 if (!estaVivo(partida.inimigos[j]))
                     continue;
                 partida.inimigos[j].i++;
-                if (tocandoBordaDireita(partida.inimigos[j].j, partida.mapa))
-                    salvarResumoInimigo(diretorio, partida, RESUMO_INIMIGO_COLIDIU_DIREITA, partida.inimigos[i]);
-                if (tocandoBordaEsquerda(partida.inimigos[j].j, partida.mapa))
-                    salvarResumoInimigo(diretorio, partida, RESUMO_INIMIGO_COLIDIU_ESQUERDA, partida.inimigos[i]);
+                if (partida.direcaoInimigos == DIRECAO_DIREITA && tocandoBordaDireita(partida.inimigos[j].j, partida.mapa))
+                    salvarResumoInimigo(diretorio, partida, RESUMO_INIMIGO_COLIDIU_DIREITA, partida.inimigos[j]);
+                if (partida.direcaoInimigos == DIRECAO_ESQUERDA && tocandoBordaEsquerda(partida.inimigos[j].j, partida.mapa))
+                    salvarResumoInimigo(diretorio, partida, RESUMO_INIMIGO_COLIDIU_ESQUERDA, partida.inimigos[j]);
             }
-            partida.direcaoInimigos = DIRECAO_ESQUERDA;
-            return partida;
-        }
-        if (partida.direcaoInimigos == DIRECAO_ESQUERDA && tocandoBordaEsquerda(partida.inimigos[i].j, partida.mapa))
-        {
-            for (int j = 0; j < partida.qtdInimigos; j++)
-            {
-                if (!estaVivo(partida.inimigos[j]))
-                    continue;
-                partida.inimigos[j].i++;
-                if (tocandoBordaDireita(partida.inimigos[j].j, partida.mapa))
-                    salvarResumoInimigo(diretorio, partida, RESUMO_INIMIGO_COLIDIU_DIREITA, partida.inimigos[i]);
-                if (tocandoBordaEsquerda(partida.inimigos[j].j, partida.mapa))
-                    salvarResumoInimigo(diretorio, partida, RESUMO_INIMIGO_COLIDIU_ESQUERDA, partida.inimigos[i]);
-            }
-            partida.direcaoInimigos = DIRECAO_DIREITA;
+            partida.direcaoInimigos = partida.direcaoInimigos == DIRECAO_DIREITA ? DIRECAO_ESQUERDA : DIRECAO_DIREITA;
             return partida;
         }
     }
@@ -644,14 +630,8 @@ void ordenarRankings(int qtdRankings, tRanking rankings[qtdRankings])
                 rankings[i] = rankings[j];
                 rankings[j] = c;
             }
-        }
-    }
-    for (int i = 0; i < qtdRankings; i++)
-    {
-        for (int j = i + 1; j < qtdRankings; j++)
-        {
-            if (rankings[i].linhaAtingido == rankings[j].linhaAtingido &&
-                rankings[i].interacaoAtingido > rankings[j].interacaoAtingido)
+            else if (rankings[i].linhaAtingido == rankings[j].linhaAtingido &&
+                     rankings[i].interacaoAtingido > rankings[j].interacaoAtingido)
             {
                 tRanking c = rankings[i];
                 rankings[i] = rankings[j];
