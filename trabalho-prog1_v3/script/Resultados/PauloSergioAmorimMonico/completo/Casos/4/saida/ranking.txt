@@ -1,2 +1,0 @@
-indice,fileira,linha,iteracao
-1,1,8,8

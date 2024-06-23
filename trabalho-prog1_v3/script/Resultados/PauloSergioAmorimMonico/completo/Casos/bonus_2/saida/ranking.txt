@@ -1,2 +1,0 @@
-indice,fileira,linha,iteracao
-1,2,6,87
