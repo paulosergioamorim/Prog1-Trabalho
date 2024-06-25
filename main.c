@@ -19,10 +19,10 @@
 #define ENEMIES_MAX_COUNT 100
 #define RESUME_NONE 0
 #define RESUME_ENEMY_HITTED 1
-#define RESUME_ENEMY_TOUCHING_LEFT_BORDER 2
-#define RESUME_ENEMY_TOUCHING_RIGHT_BORDER 3
-#define RESUME_PLAYER_TOUCHING_LEFT_BORDER 4
-#define RESUME_PLAYER_TOUCHING_RIGHT_BORDER 5
+#define RESUME_ENEMY_HAS_COLLIDED_LEFT_BORDER 2
+#define RESUME_ENEMY_HAS_COLLIDED_RIGHT_BORDER 3
+#define RESUME_PLAYER_HAS_COLLIDED_LEFT_BORDER 4
+#define RESUME_PLAYER_HAS_COLLIDED_RIGHT_BORDER 5
 #define STATISTICS_PLAYER_MOVE 0
 #define STATISTICS_EFFECTIVE_SHOT 1
 #define STATISTICS_NON_EFFECTIVE_SHOT 2
@@ -135,7 +135,7 @@ FILE *createFile(char dir[], char fileName[], char modes[]);
 void createResumeFile(char dir[]);
 
 /// @brief Cria um jogo
-/// @param dir diretório raiz para inicializar o jogo 
+/// @param dir diretório raiz para inicializar o jogo
 /// @return Jogo criado
 Game createGame(char dir[]);
 
@@ -145,20 +145,62 @@ Game createGame(char dir[]);
 /// @return Jogo finalizado
 Game playGame(char dir[], Game game);
 
-/// @brief 
-/// @param game 
-/// @return 
+/// @brief Atualiza os desenhos das entidades no mapa e no heatmap
+/// @param game jogo no seu estado atual
+/// @return Jogo atualizado
 Game updateGameState(Game game);
+
+/// @brief Inverte a direção dos inimigos
+/// @param enemiesDirection direção atual
+/// @return Nova direção
+int changeEnemiesDirection(int enemiesDirection);
+
+/// @brief Imprime o estado atual do jogo (pontos, iteração e mapa atual)
+/// @param map mapa atual
+/// @param points pontos atuais
+/// @param iteration iteracao atual
 void printGameState(Map map, int points, int iteration);
+
+/// @brief Verifica se uma acao do jogador é valida
+/// @param action ação a se verificar
+/// @return Se é valida ou não
 int isValidAction(char action);
 
+/// @brief Move o jogador no mapa com base numa ação (a ou d)
+/// @param map mapa atual
+/// @param player estado atual do jogador
+/// @param action ação a ser executada
+/// @param statistics estatísticas atuais
+/// @return Novo estado do jogador e as novas estatísticas
 MovePlayerResult movePlayer(Map map, Player player, char action, Statistics statistics);
+
+/// @brief Move o jogador para a esquerda
+/// @param player estado atual do jogador
+/// @return Novo estado do jogador
 Player moveToLeft(Player player);
+
+/// @brief Move o jogador para a direita
+/// @param player estado atual do jogador
+/// @return Novo estado do jogador
 Player moveToRigth(Player player);
+
+/// @brief Cria um jogador com sua posição inicial
+/// @param dir diretório raiz do jogo
+/// @return Jogador inicializado
 Player createPlayer(char dir[]);
+
+/// @brief Calcula a linha limite entre o jogador e os inimigos. Se for atravessada
+/// por qualquer inimigo, o jogador perde o jogo.
+/// @param player estado atual do jogador
+/// @return Posição do eixo y da linha limite
 int calculatePlayerLimit(Player player);
 
+/// @brief Cria inimigos
+/// @param dir diretório raiz do jogo
+/// @param enemies lista de inimigos do jogo
+/// @return Quantidade de inimigos criados
 int createEnemies(char dir[], Enemy enemies[]);
+
 MoveEnemiesResult moveEnemies(char dir[], Map map, int enemiesCount, Enemy enemies[], int enemiesDirection, int iteration, Statistics statistics);
 void moveDownEnemies(char dir[], Map map, int enemiesCount, Enemy enemies[], int iteration, int enemiesDirection);
 int isAlive(Enemy enemy);
@@ -167,6 +209,8 @@ int someEnemyCrossPlayerLimit(int enemiesCount, Enemy enemies[], Player player);
 int someEnemyHitted(int enemiesCount, Enemy enemies[], Shot shot);
 int calculatePoints(Map map, Enemy enemy);
 void killEnemy(Enemy enemies[], int id);
+int isEnemyCollidingWithLeftBorder(Enemy enemy, int enemiesDirection);
+int isEnemyCollidingWithRightBorder(Map map, Enemy enemy, int enemiesDirection);
 
 Map createMap(char dir[]);
 Map cleanMap(Map map);
@@ -183,7 +227,6 @@ int isBorder(Map map, int i, int j);
 int isCorner(Map map, int i, int j);
 int isTouchingLeftBorder(int j);
 int isTouchingRightBorder(Map map, int j);
-int isTouchingVerticalBorder(Map map, int j);
 void printMap(Map map);
 
 ShotResult moveShot(Shot shot, Statistics statistics);
@@ -215,17 +258,15 @@ void saveHeatmap(char dir[], Heatmap heatmap);
 
 int main(int argc, char const *argv[])
 {
+    FILE *pInputFile;
+    FILE *pResumeFile;
     char dir[DIR_MAX_LENGTH];
-#if 1
     if (argc < 2)
     {
         printf("ERRO: Informe o diretorio com os arquivos de configuracao.");
         return 1;
     }
     strcpy(dir, argv[1]);
-#else
-    strcpy(dir, "./teste");
-#endif
     createResumeFile(dir);
     Game game = createGame(dir);
     saveInitialization(dir, game.map, game.player);
@@ -644,18 +685,12 @@ MoveEnemiesResult moveEnemies(char dir[], Map map, int enemiesCount, Enemy enemi
         {
             continue;
         }
-        if (enemiesDirection == DIRECTION_RIGHT && isTouchingRightBorder(map, enemy.j))
+        if (isEnemyCollidingWithLeftBorder(enemy, enemiesDirection) ||
+            isEnemyCollidingWithRightBorder(map, enemy, enemiesDirection))
         {
             moveDownEnemies(dir, map, enemiesCount, enemies, iteration, enemiesDirection);
             result.statistics = addStatistic(result.statistics, STATISTICS_ENEMIES_MOVE_DOWN);
-            result.enemiesDirection = DIRECTION_LEFT;
-            return result;
-        }
-        if (enemiesDirection == DIRECTION_LEFT && isTouchingLeftBorder(enemy.j))
-        {
-            moveDownEnemies(dir, map, enemiesCount, enemies, iteration, enemiesDirection);
-            result.statistics = addStatistic(result.statistics, STATISTICS_ENEMIES_MOVE_DOWN);
-            result.enemiesDirection = DIRECTION_RIGHT;
+            result.enemiesDirection = changeEnemiesDirection(result.enemiesDirection);
             return result;
         }
     }
@@ -680,16 +715,16 @@ void moveDownEnemies(char dir[], Map map, int enemiesCount, Enemy enemies[], int
             continue;
         }
         enemy.i++;
-        if (isTouchingVerticalBorder(map, enemy.j))
+        if (isEnemyCollidingWithLeftBorder(enemy, enemiesDirection) ||
+            isEnemyCollidingWithRightBorder(map, enemy, enemiesDirection))
         {
-            if (enemiesDirection == DIRECTION_LEFT && isTouchingLeftBorder(enemy.j))
-            {
-                saveEnemyTouchingBorderResume(dir, iteration, enemy, RESUME_ENEMY_TOUCHING_LEFT_BORDER);
-            }
-            else if (enemiesDirection == DIRECTION_RIGHT && isTouchingRightBorder(map, enemy.j))
-            {
-                saveEnemyTouchingBorderResume(dir, iteration, enemy, RESUME_ENEMY_TOUCHING_RIGHT_BORDER);
-            }
+            saveEnemyTouchingBorderResume(
+                dir,
+                iteration,
+                enemy,
+                enemiesDirection == DIRECTION_RIGHT
+                    ? RESUME_ENEMY_HAS_COLLIDED_RIGHT_BORDER
+                    : RESUME_ENEMY_HAS_COLLIDED_LEFT_BORDER);
         }
         enemies[i] = enemy;
     }
@@ -741,7 +776,7 @@ MovePlayerResult movePlayer(Map map, Player player, char action, Statistics stat
     {
         if (isTouchingLeftBorder(player.j))
         {
-            result.resumeEvent = RESUME_PLAYER_TOUCHING_LEFT_BORDER;
+            result.resumeEvent = RESUME_PLAYER_HAS_COLLIDED_LEFT_BORDER;
             return result;
         }
         result.statistics = addStatistic(result.statistics, STATISTICS_PLAYER_MOVE);
@@ -751,7 +786,7 @@ MovePlayerResult movePlayer(Map map, Player player, char action, Statistics stat
     {
         if (isTouchingRightBorder(map, player.j))
         {
-            result.resumeEvent = RESUME_PLAYER_TOUCHING_RIGHT_BORDER;
+            result.resumeEvent = RESUME_PLAYER_HAS_COLLIDED_RIGHT_BORDER;
             return result;
         }
         result.statistics = addStatistic(result.statistics, STATISTICS_PLAYER_MOVE);
@@ -807,11 +842,11 @@ void printMap(Map map)
 void savePlayerTouchingBorderResume(char dir[], int iteration, Player player, int event)
 {
     FILE *pFile = createFile(dir, FILE_RESUME, "a+");
-    if (event == RESUME_PLAYER_TOUCHING_LEFT_BORDER)
+    if (event == RESUME_PLAYER_HAS_COLLIDED_LEFT_BORDER)
     {
         fprintf(pFile, "[%d] Jogador colidiu na lateral esquerda.\n", iteration + 1);
     }
-    else if (event == RESUME_PLAYER_TOUCHING_RIGHT_BORDER)
+    else if (event == RESUME_PLAYER_HAS_COLLIDED_RIGHT_BORDER)
     {
         fprintf(pFile, "[%d] Jogador colidiu na lateral direita.\n", iteration + 1);
     }
@@ -828,20 +863,15 @@ void saveEnemyHittedResume(char dir[], int iteration, Enemy enemy, Shot shot)
 void saveEnemyTouchingBorderResume(char dir[], int iteration, Enemy enemy, int event)
 {
     FILE *pFile = createFile(dir, FILE_RESUME, "a+");
-    if (event == RESUME_ENEMY_TOUCHING_RIGHT_BORDER)
+    if (event == RESUME_ENEMY_HAS_COLLIDED_RIGHT_BORDER)
     {
         fprintf(pFile, "[%d] Inimigo de indice %d da fileira %d colidiu na lateral direita.\n", iteration, enemy.id, enemy.row);
     }
-    else if (event == RESUME_ENEMY_TOUCHING_LEFT_BORDER)
+    else if (event == RESUME_ENEMY_HAS_COLLIDED_LEFT_BORDER)
     {
         fprintf(pFile, "[%d] Inimigo de indice %d da fileira %d colidiu na lateral esquerda.\n", iteration, enemy.id, enemy.row);
     }
     fclose(pFile);
-}
-
-int isTouchingVerticalBorder(Map map, int j)
-{
-    return isTouchingLeftBorder(j) || isTouchingRightBorder(map, j);
 }
 
 int addEnemyRanking(int rankingsCount, Ranking rankings[], Map map, Enemy enemy, Shot shot, int iteration)
@@ -986,4 +1016,19 @@ Heatmap markShot(Heatmap heatmap, Shot shot)
     if (isActive(shot))
         heatmap = markHeatmap(heatmap, shot.i - 1, shot.j - 1, 0, 0);
     return heatmap;
+}
+
+int changeEnemiesDirection(int enemiesDirection)
+{
+    return enemiesDirection == DIRECTION_RIGHT ? DIRECTION_LEFT : DIRECTION_RIGHT;
+}
+
+int isEnemyCollidingWithLeftBorder(Enemy enemy, int enemiesDirection)
+{
+    return enemiesDirection == DIRECTION_LEFT && isTouchingLeftBorder(enemy.j);
+}
+
+int isEnemyCollidingWithRightBorder(Map map, Enemy enemy, int enemiesDirection)
+{
+    return enemiesDirection == DIRECTION_RIGHT && isTouchingRightBorder(map, enemy.j);
 }
