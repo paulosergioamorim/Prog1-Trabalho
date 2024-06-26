@@ -201,11 +201,51 @@ int calculatePlayerLimit(Player player);
 /// @return Quantidade de inimigos criados
 int createEnemies(char dir[], Enemy enemies[]);
 
+/// @brief Move todos os inimigos vivos para a atual direção dos mesmos
+/// @param dir diretório raiz do jogo
+/// @param map mapa atual
+/// @param enemiesCount quantidade de inimigos
+/// @param enemies inimigos do jogo
+/// @param enemiesDirection direcao atual dos inimigos
+/// @param iteration iteração atual do jogo
+/// @param statistics estatísticas atuais
+/// @return Resultado do movimento
 MoveEnemiesResult moveEnemies(char dir[], Map map, int enemiesCount, Enemy enemies[], int enemiesDirection, int iteration, Statistics statistics);
+
+/// @brief Move todos os inimigos vivos para baixo (1 linha)
+/// @param dir diretório raiz do jogo
+/// @param map mapa atual
+/// @param enemiesCount quantidade de inimigos
+/// @param enemies inimigos do jogo
+/// @param enemiesDirection direcao atual dos inimigos
+/// @param iteration iteração atual do jogo
 void moveDownEnemies(char dir[], Map map, int enemiesCount, Enemy enemies[], int iteration, int enemiesDirection);
+
+/// @brief Verifica se um inimigo está vivo ou não
+/// @param enemy inimigo
+/// @return Se está vivo ou não
 int isAlive(Enemy enemy);
+
+/// @brief Verifica se há algum inimigo vivo no jogo. Caso não haja, o jogo se
+/// dá como encerrado (vitória)
+/// @param enemiesCount quantidade de inimigos
+/// @param enemies inimigos do jogo
+/// @return Se há algum inimigo vivo
 int someEnemyAlive(int enemiesCount, Enemy enemies[]);
+
+/// @brief Verifica se há algum inimigo que cruzou a linha limite do jogador.
+/// Caso haja, o jogo se dá como encerrado (derrota)
+/// @param enemiesCount quantidade de inimigos
+/// @param enemies inimigos do jogo
+/// @param player jogador
+/// @return Se há algum inimigo que cruzou a linha limite
 int someEnemyCrossPlayerLimit(int enemiesCount, Enemy enemies[], Player player);
+
+/// @brief Verifica se há algum inimigo que foi atingido por um tiro 
+/// @param enemiesCount quantidade de inimigos
+/// @param enemies 
+/// @param shot 
+/// @return 
 int someEnemyHitted(int enemiesCount, Enemy enemies[], Shot shot);
 int calculatePoints(Map map, Enemy enemy);
 void killEnemy(Enemy enemies[], int id);
