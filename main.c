@@ -148,8 +148,6 @@ int someEnemyCrossPlayerLimit(int enemiesCount, Enemy enemies[], Player player);
 int someEnemyHitted(int enemiesCount, Enemy enemies[], Shot shot);
 int calculatePoints(Map map, Enemy enemy);
 void killEnemy(Enemy enemies[], int id);
-int isEnemyCollidingWithLeftBorder(Enemy enemy, int enemiesDirection);
-int isEnemyCollidingWithRightBorder(Map map, Enemy enemy, int enemiesDirection);
 
 Map createMap(char dir[]);
 Map cleanMap(Map map);
@@ -896,14 +894,4 @@ Heatmap markShot(Heatmap heatmap, Shot shot)
 int changeEnemiesDirection(int enemiesDirection)
 {
     return enemiesDirection == DIRECTION_RIGHT ? DIRECTION_LEFT : DIRECTION_RIGHT;
-}
-
-int isEnemyCollidingWithLeftBorder(Enemy enemy, int enemiesDirection)
-{
-    return enemiesDirection == DIRECTION_LEFT && isTouchingLeftBorder(enemy.j);
-}
-
-int isEnemyCollidingWithRightBorder(Map map, Enemy enemy, int enemiesDirection)
-{
-    return enemiesDirection == DIRECTION_RIGHT && isTouchingRightBorder(map, enemy.j);
 }
