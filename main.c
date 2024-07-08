@@ -520,7 +520,7 @@ Game playGame(char dir[], Game game)
     FILE *pFile = createFile(dir, FILE_INPUT, "r");
     char action = 0;
     int hittedEnemyId = NOT_HITTED;
-    for (game.iteration = 0;; game.iteration++)
+    for (game.iteration = 0; !feof(pFile); game.iteration++)
     {
         printGameState(game.map, game.points, game.iteration);
         if (!someEnemyAlive(game.enemiesCount, game.enemies))
