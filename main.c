@@ -2,27 +2,23 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAP_MAX_L 40
-#define MAP_MAX_C 100
+#define DIR_MAX_LENGTH 1000
+#define MAP_MAX_LINES 40
+#define MAP_MAX_COLUMNS 100
+#define ENEMIES_MAX_COUNT 100
 #define FILE_MAP "mapa.txt"
 #define FILE_ENEMY "inimigo.txt"
 #define FILE_INPUT "entrada.txt"
-#define FILE_INIT "./saida/inicializacao.txt"
+#define FILE_INITIALIZATION "./saida/inicializacao.txt"
 #define FILE_RESUME "./saida/resumo.txt"
 #define FILE_RANKING "./saida/ranking.txt"
 #define FILE_STATISTICS "./saida/estatisticas.txt"
 #define FILE_HEATMAP "./saida/heatmap.txt"
 #define DIRECTION_RIGHT 1
 #define DIRECTION_LEFT -1
-#define NOT_HITTED -1
-#define DIR_MAX_LENGTH 1000
-#define ENEMIES_MAX_COUNT 100
-#define RESUME_NONE 0
-#define RESUME_ENEMY_HITTED 1
-#define RESUME_ENEMY_HAS_COLLIDED_LEFT_BORDER 2
-#define RESUME_ENEMY_HAS_COLLIDED_RIGHT_BORDER 3
-#define RESUME_PLAYER_HAS_COLLIDED_LEFT_BORDER 4
-#define RESUME_PLAYER_HAS_COLLIDED_RIGHT_BORDER 5
+#define NONE -1
+#define BORDER_LEFT 0
+#define BORDER_RIGHT 1
 #define STATISTICS_PLAYER_MOVE 0
 #define STATISTICS_EFFECTIVE_SHOT 1
 #define STATISTICS_NON_EFFECTIVE_SHOT 2
@@ -61,7 +57,7 @@ typedef struct Map
 {
     int l;
     int c;
-    char values[MAP_MAX_L + 2][MAP_MAX_C + 2];
+    char values[MAP_MAX_LINES + 2][MAP_MAX_COLUMNS + 2];
 } Map;
 
 typedef struct Ranking
@@ -84,7 +80,7 @@ typedef struct Heatmap
 {
     int l;
     int c;
-    int values[MAP_MAX_L][MAP_MAX_C];
+    int values[MAP_MAX_LINES][MAP_MAX_COLUMNS];
 } Heatmap;
 
 typedef struct Game
@@ -108,12 +104,22 @@ typedef struct MovePlayerResult
 {
     Player player;
     Statistics statistics;
-    int resumeEvent;
+    int touchedBorder;
 } MovePlayerResult;
+
+typedef struct
+{
+    int iteration;
+    int id;
+    int row;
+    int touchedBorder;
+} EnemyCollision;
 
 typedef struct MoveEnemiesResult
 {
     int enemiesDirection;
+    int enemyCollisionsCount;
+    EnemyCollision enemyCollisions[ENEMIES_MAX_COUNT];
     Statistics statistics;
 } MoveEnemiesResult;
 
@@ -140,8 +146,8 @@ Player createPlayer(char dir[]);
 int calculatePlayerLimit(Player player);
 
 int createEnemies(char dir[], Enemy enemies[]);
-MoveEnemiesResult moveEnemies(char dir[], Map map, int enemiesCount, Enemy enemies[], int enemiesDirection, int iteration, Statistics statistics);
-void moveDownEnemies(char dir[], Map map, int enemiesCount, Enemy enemies[], int iteration, int enemiesDirection);
+MoveEnemiesResult moveEnemies(Map map, int enemiesCount, Enemy enemies[], int enemiesDirection, int iteration, Statistics statistics);
+int moveDownEnemies(Map map, int enemiesCount, Enemy enemies[], int iteration, int enemiesDirection, int enemyCollisionsCount, EnemyCollision enemyCollisions[]);
 int isAlive(Enemy enemy);
 int someEnemyAlive(int enemiesCount, Enemy enemies[]);
 int someEnemyCrossPlayerLimit(int enemiesCount, Enemy enemies[], Player player);
@@ -153,7 +159,7 @@ int isEnemyCollidingWithRightBorder(Map map, Enemy enemy, int enemiesDirection);
 
 Map createMap(char dir[]);
 Map cleanMap(Map map);
-Map drawMatrix(Map map, int i, int j, char values[3][3]);
+Map drawMatrix(Map map, int i, int j, int width, int height, char values[width][height]);
 Map drawPlayer(Map map, Player player);
 Map drawPlayerLimit(Map map, Player player);
 Map drawEnemies(Map map, int enemiesCount, Enemy enemies[], EnemyDraw enemyDraw);
@@ -188,9 +194,9 @@ Heatmap markPlayer(Heatmap heatmap, Player player);
 Heatmap markShot(Heatmap heatmap, Shot shot);
 
 void saveInitialization(char dir[], Map map, Player player);
-void savePlayerTouchingBorderResume(char dir[], int iteration, Player player, int event);
+void savePlayerCollisionResume(char dir[], int iteration, Player player, int event);
 void saveEnemyHittedResume(char dir[], int iteration, Enemy enemy, Shot shot);
-void saveEnemyTouchingBorderResume(char dir[], int iteration, Enemy enemy, int event);
+void saveEnemyCollisionResume(char dir[], EnemyCollision collision);
 void saveRankings(char dir[], int rankingsCount, Ranking rankings[]);
 void saveStatistics(char dir[], Statistics statistics);
 void saveHeatmap(char dir[], Heatmap heatmap);
@@ -365,7 +371,7 @@ int someEnemyCrossPlayerLimit(int enemiesCount, Enemy enemies[], Player player)
 int someEnemyHitted(int enemiesCount, Enemy enemies[], Shot shot)
 {
     if (!isActive(shot))
-        return NOT_HITTED;
+        return NONE;
     for (int id = 0; id < enemiesCount; id++)
     {
         Enemy enemy = enemies[id];
@@ -376,7 +382,7 @@ int someEnemyHitted(int enemiesCount, Enemy enemies[], Shot shot)
                 if (i == shot.i && j == shot.j)
                     return id;
     }
-    return NOT_HITTED;
+    return NONE;
 }
 
 int calculatePoints(Map map, Enemy enemy)
@@ -442,7 +448,7 @@ Shot disableShot(Shot shot)
 
 void saveInitialization(char dir[], Map map, Player player)
 {
-    FILE *pFile = createFile(dir, FILE_INIT, "w+");
+    FILE *pFile = createFile(dir, FILE_INITIALIZATION, "w+");
     for (int i = 0; i < map.l; i++)
         for (int j = 0; j < map.c; j++)
         {
@@ -459,7 +465,7 @@ int calculatePlayerLimit(Player player)
     return player.i - 2;
 }
 
-Map drawMatrix(Map map, int i, int j, char values[3][3])
+Map drawMatrix(Map map, int i, int j, int width, int height, char values[width][height])
 {
     /*
     Desenha no mapa um desenho 3x3 com a posição central (i, j)
@@ -473,7 +479,7 @@ Map drawMatrix(Map map, int i, int j, char values[3][3])
 Map drawPlayer(Map map, Player player)
 {
     char playerDraw[3][3] = {{'M', ' ', 'M'}, {'M', 'M', 'M'}, {'M', 'M', 'M'}};
-    map = drawMatrix(map, player.i, player.j, playerDraw);
+    map = drawMatrix(map, player.i, player.j, 3, 3, playerDraw);
     return map;
 }
 
@@ -502,7 +508,7 @@ Map drawEnemies(Map map, int enemiesCount, Enemy enemies[], EnemyDraw enemyDraw)
         Enemy enemy = enemies[i];
         if (!isAlive(enemy))
             continue;
-        map = drawMatrix(map, enemy.i, enemy.j, enemyDraw.values[enemyDraw.currentAnimation]);
+        map = drawMatrix(map, enemy.i, enemy.j, 3, 3, enemyDraw.values[enemyDraw.currentAnimation]);
     }
     return map;
 }
@@ -519,7 +525,7 @@ Game playGame(char dir[], Game game)
 {
     FILE *pFile = createFile(dir, FILE_INPUT, "r");
     char action = 0;
-    int hittedEnemyId = NOT_HITTED;
+    int hittedEnemyId = NONE;
     for (game.iteration = 0; !feof(pFile); game.iteration++)
     {
         printGameState(game.map, game.points, game.iteration);
@@ -533,7 +539,7 @@ Game playGame(char dir[], Game game)
             printf("Você perdeu, tente novamente!\n");
             return game;
         }
-        if ((hittedEnemyId = someEnemyHitted(game.enemiesCount, game.enemies, game.shot)) != NOT_HITTED)
+        if ((hittedEnemyId = someEnemyHitted(game.enemiesCount, game.enemies, game.shot)) != NONE)
         {
             Enemy hittedEnemy = game.enemies[hittedEnemyId];
             game.points += calculatePoints(game.map, hittedEnemy);
@@ -545,7 +551,12 @@ Game playGame(char dir[], Game game)
         do
             fscanf(pFile, "%c", &action);
         while (action == '\n');
-        MoveEnemiesResult moveEnemiesResult = moveEnemies(dir, game.map, game.enemiesCount, game.enemies, game.enemiesDirection, game.iteration, game.statistics);
+        MoveEnemiesResult moveEnemiesResult = moveEnemies(game.map, game.enemiesCount, game.enemies, game.enemiesDirection, game.iteration, game.statistics);
+        for (int i = 0; i < moveEnemiesResult.enemyCollisionsCount; i++)
+        {
+            EnemyCollision collision = moveEnemiesResult.enemyCollisions[i];
+            saveEnemyCollisionResume(dir, collision);
+        }
         game.enemiesDirection = moveEnemiesResult.enemiesDirection;
         game.statistics = moveEnemiesResult.statistics;
         ShotResult moveShotResult = moveShot(game.shot, game.statistics);
@@ -564,7 +575,7 @@ Game playGame(char dir[], Game game)
                 MovePlayerResult movePlayerResult = movePlayer(game.map, game.player, action, game.statistics);
                 game.player = movePlayerResult.player;
                 game.statistics = movePlayerResult.statistics;
-                savePlayerTouchingBorderResume(dir, game.iteration, game.player, movePlayerResult.resumeEvent);
+                savePlayerCollisionResume(dir, game.iteration, game.player, movePlayerResult.touchedBorder);
             }
         }
         game = updateGameState(game);
@@ -572,11 +583,12 @@ Game playGame(char dir[], Game game)
     fclose(pFile);
 }
 
-MoveEnemiesResult moveEnemies(char dir[], Map map, int enemiesCount, Enemy enemies[], int enemiesDirection, int iteration, Statistics statistics)
+MoveEnemiesResult moveEnemies(Map map, int enemiesCount, Enemy enemies[], int enemiesDirection, int iteration, Statistics statistics)
 {
     MoveEnemiesResult result;
     result.enemiesDirection = enemiesDirection;
     result.statistics = statistics;
+    result.enemyCollisionsCount = 0;
     for (int i = 0; i < enemiesCount; i++)
     {
         Enemy enemy = enemies[i];
@@ -586,14 +598,13 @@ MoveEnemiesResult moveEnemies(char dir[], Map map, int enemiesCount, Enemy enemi
         Verifica se um inimigo está colidindo com a parede esquerda ou direita.
         Caso esteja, move todos os inimigos para baixo e adiciona essa estatística.
          */
-        if (isEnemyCollidingWithLeftBorder(enemy, enemiesDirection) ||
-            isEnemyCollidingWithRightBorder(map, enemy, enemiesDirection))
-        {
-            moveDownEnemies(dir, map, enemiesCount, enemies, iteration, enemiesDirection);
-            result.statistics = addStatistic(result.statistics, STATISTICS_ENEMIES_MOVE_DOWN);
-            result.enemiesDirection = changeEnemiesDirection(result.enemiesDirection);
-            return result;
-        }
+        if (!isEnemyCollidingWithLeftBorder(enemy, enemiesDirection) &&
+            !isEnemyCollidingWithRightBorder(map, enemy, enemiesDirection))
+            continue;
+        result.enemyCollisionsCount = moveDownEnemies(map, enemiesCount, enemies, iteration, enemiesDirection, result.enemyCollisionsCount, result.enemyCollisions);
+        result.statistics = addStatistic(result.statistics, STATISTICS_ENEMIES_MOVE_DOWN);
+        result.enemiesDirection = changeEnemiesDirection(result.enemiesDirection);
+        return result;
     }
     for (int i = 0; i < enemiesCount; i++)
     {
@@ -604,7 +615,7 @@ MoveEnemiesResult moveEnemies(char dir[], Map map, int enemiesCount, Enemy enemi
     return result;
 }
 
-void moveDownEnemies(char dir[], Map map, int enemiesCount, Enemy enemies[], int iteration, int enemiesDirection)
+int moveDownEnemies(Map map, int enemiesCount, Enemy enemies[], int iteration, int enemiesDirection, int enemyCollisionsCount, EnemyCollision enemyCollisions[])
 {
     for (int i = 0; i < enemiesCount; i++)
     {
@@ -612,21 +623,25 @@ void moveDownEnemies(char dir[], Map map, int enemiesCount, Enemy enemies[], int
         if (!isAlive(enemy))
             continue;
         enemy.i++;
+        enemies[i] = enemy;
         /*
         Verifica se o inimigo está colidindo com a parede esquerda ou direita.
-        Caso esteja, salva um resumo com base em qual parede colidiu
+        Caso esteja, salva a colisão com base em qual parede colidiu
          */
-        if (isEnemyCollidingWithLeftBorder(enemy, enemiesDirection) ||
-            isEnemyCollidingWithRightBorder(map, enemy, enemiesDirection))
-            saveEnemyTouchingBorderResume(
-                dir,
-                iteration,
-                enemy,
-                enemiesDirection == DIRECTION_RIGHT
-                    ? RESUME_ENEMY_HAS_COLLIDED_RIGHT_BORDER
-                    : RESUME_ENEMY_HAS_COLLIDED_LEFT_BORDER);
-        enemies[i] = enemy;
+        if (!isEnemyCollidingWithLeftBorder(enemy, enemiesDirection) &&
+            !isEnemyCollidingWithRightBorder(map, enemy, enemiesDirection))
+            continue;
+        EnemyCollision collision;
+        collision.iteration = iteration;
+        collision.touchedBorder = enemiesDirection == DIRECTION_RIGHT
+                                      ? BORDER_RIGHT
+                                      : BORDER_LEFT;
+        collision.id = enemy.id;
+        collision.row = enemy.row;
+        enemyCollisions[enemyCollisionsCount] = collision;
+        enemyCollisionsCount++;
     }
+    return enemyCollisionsCount;
 }
 
 ShotResult moveShot(Shot shot, Statistics statistics)
@@ -666,12 +681,12 @@ MovePlayerResult movePlayer(Map map, Player player, char action, Statistics stat
     MovePlayerResult result;
     result.player = player;
     result.statistics = statistics;
-    result.resumeEvent = RESUME_NONE;
+    result.touchedBorder = NONE;
     if (action == 'a')
     {
         if (isTouchingLeftBorder(player.j))
         {
-            result.resumeEvent = RESUME_PLAYER_HAS_COLLIDED_LEFT_BORDER;
+            result.touchedBorder = BORDER_LEFT;
             return result;
         }
         result.statistics = addStatistic(result.statistics, STATISTICS_PLAYER_MOVE);
@@ -681,7 +696,7 @@ MovePlayerResult movePlayer(Map map, Player player, char action, Statistics stat
     {
         if (isTouchingRightBorder(map, player.j))
         {
-            result.resumeEvent = RESUME_PLAYER_HAS_COLLIDED_RIGHT_BORDER;
+            result.touchedBorder = BORDER_RIGHT;
             return result;
         }
         result.statistics = addStatistic(result.statistics, STATISTICS_PLAYER_MOVE);
@@ -732,13 +747,12 @@ void printMap(Map map)
         }
 }
 
-void savePlayerTouchingBorderResume(char dir[], int iteration, Player player, int event)
+void savePlayerCollisionResume(char dir[], int iteration, Player player, int touchedBorder)
 {
     FILE *pFile = createFile(dir, FILE_RESUME, "a+");
-    if (event == RESUME_PLAYER_HAS_COLLIDED_LEFT_BORDER)
-        fprintf(pFile, "[%d] Jogador colidiu na lateral esquerda.\n", iteration + 1);
-    else if (event == RESUME_PLAYER_HAS_COLLIDED_RIGHT_BORDER)
-        fprintf(pFile, "[%d] Jogador colidiu na lateral direita.\n", iteration + 1);
+    if (touchedBorder == NONE)
+        return;
+    fprintf(pFile, "[%d] Jogador colidiu na lateral %s.\n", iteration + 1, touchedBorder == BORDER_LEFT ? "esquerda" : "direita");
     fclose(pFile);
 }
 
@@ -749,13 +763,10 @@ void saveEnemyHittedResume(char dir[], int iteration, Enemy enemy, Shot shot)
     fclose(pFile);
 }
 
-void saveEnemyTouchingBorderResume(char dir[], int iteration, Enemy enemy, int event)
+void saveEnemyCollisionResume(char dir[], EnemyCollision collision)
 {
     FILE *pFile = createFile(dir, FILE_RESUME, "a+");
-    if (event == RESUME_ENEMY_HAS_COLLIDED_RIGHT_BORDER)
-        fprintf(pFile, "[%d] Inimigo de indice %d da fileira %d colidiu na lateral direita.\n", iteration, enemy.id, enemy.row);
-    else if (event == RESUME_ENEMY_HAS_COLLIDED_LEFT_BORDER)
-        fprintf(pFile, "[%d] Inimigo de indice %d da fileira %d colidiu na lateral esquerda.\n", iteration, enemy.id, enemy.row);
+    fprintf(pFile, "[%d] Inimigo de indice %d da fileira %d colidiu na lateral %s.\n", collision.iteration, collision.id, collision.row, collision.touchedBorder == BORDER_LEFT ? "esquerda" : "direita");
     fclose(pFile);
 }
 
